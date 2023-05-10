@@ -2,10 +2,10 @@
 id: 4mmrte35ar3p4u8s8iba1k3
 title: Cloudwave
 desc: ''
-updated: 1683710328112
+updated: 1683722200036
 created: 1683710328112
 ---
-# Welcome to Cloudwave Documentation
+#  Cloudwave Documentation
 
 We're thrilled that you've chosen our one-click deployment PaaS platform to deploy your applications and are excited to provide you with the resources you need to get started quickly and easily. 💻🚀
 
