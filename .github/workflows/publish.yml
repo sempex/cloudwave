@@ -49,4 +49,3 @@ jobs:
         publish_branch: docs
         publish_dir: docs/docs/
         force_orphan: true
-        #cname: example.com
