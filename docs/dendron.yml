@@ -81,6 +81,8 @@ preview:
     enableKatex: true
     automaticallyShowPreview: false
 publishing:
+    siteUrl: https://sempex.github.io
+    assetsPrefix: /cloudwave
     enableFMTitle: true
     enableNoteTitleForLink: true
     enablePrettyRefs: true
