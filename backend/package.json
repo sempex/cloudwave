@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist",
+  "type": "module",
   "scripts": {
     "build": "npm run tsc",
     "tsc": "tsc -p tsconfig.json",
