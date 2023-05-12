@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run tsc",
+    "prestart": "npm run build",
     "tsc": "tsc -p tsconfig.json",
     "dev": "concurrently \"nodemon dist\" \"tsc --watch\"",
     "test": "tsc && ./node_modules/.bin/mocha dist/**/*.spec.js",
