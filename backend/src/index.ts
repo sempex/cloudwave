@@ -14,7 +14,7 @@ type Get = {
   res: Response;
 };
 
-app.get("/", ({ req, res }: Get) => {
+app.get("/", (req, res) => {
   connect(
     async (client) => {
       // use a node:16-slim container
@@ -35,7 +35,7 @@ app.get("/", ({ req, res }: Get) => {
   res.send("Express + TypeScript Server");
 });
 
-app.get("/deploy", async ({ req, res }: Get) => {
+app.get("/deploy", async (req, res) => {
   node("https://github.com/eMahtab/node-express-hello-world");
   res.send("running pipeline...");
 });
