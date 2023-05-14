@@ -1,11 +1,18 @@
 import { apps, networking, core } from "./k8s.js";
 import { V1Deployment, V1Ingress } from "@kubernetes/client-node";
 
+const DEFAULT_APP_PORT = 3000
+
 export default async function deploy(
   name: string,
-  image: string
+  config: {
+    image: string;
+    appPort?: number;
+  }
 ) {
   const nameSpace = "default";
+  const domain = "cloudwave.local";
+  const appDomain = `${name}.${domain}`;
 
   const deploymentSpec: V1Deployment = {
     spec: {
@@ -25,10 +32,10 @@ export default async function deploy(
           containers: [
             {
               name: name,
-              image: image,
+              image: config.image,
               ports: [
                 {
-                  containerPort: 3000,
+                  containerPort: config.appPort || DEFAULT_APP_PORT,
                 },
               ],
             },
@@ -49,7 +56,7 @@ export default async function deploy(
       ingressClassName: "nginx",
       rules: [
         {
-          host: `${name}.cloudwave.local`,
+          host: appDomain,
           http: {
             paths: [
               {
@@ -83,7 +90,7 @@ export default async function deploy(
         {
           name: "http",
           port: 80,
-          targetPort: 3000,
+          targetPort: config.appPort || DEFAULT_APP_PORT,
         },
       ],
       type: "ClusterIP",
@@ -106,5 +113,6 @@ export default async function deploy(
     deployment,
     ingress,
     service,
+    domain: appDomain,
   };
 }

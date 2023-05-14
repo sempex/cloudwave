@@ -1,7 +1,12 @@
 import { connect } from "@dagger.io/dagger";
 
-export default async function node(git: string) {
-  return connect(
+export default async function node(
+  git: string,
+  name: string
+): Promise<null | string> {
+  let image = null;
+
+  await connect(
     async (client) => {
       const src = client.git(git).branch("master").tree();
       // use a node:16-slim container
@@ -17,11 +22,14 @@ export default async function node(git: string) {
       // execute
       const version = await container.stdout();
 
-      const imgRef = await container.publish("ttl.sh/tims-demo-v1:1h");
+      const imgRef = await container.publish(
+        `ttl.sh/cloudwave-image-${name}:1h`
+      );
 
-      // print output
-      console.log("Hello from Dagger and Node " + version, " REF:", imgRef);
+      image = imgRef;
     },
     { LogOutput: process.stdout }
   );
+
+  return image;
 }
