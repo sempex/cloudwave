@@ -43,7 +43,7 @@ app.post("/deploy", async (req, res) => {
 
   const appPort = req.body.port;
 
-  const image = await node(appName, git);
+  const image = await node(git, appName);
 
   if (!image) return res.status(500).send("Image url could not be retrieved");
 
