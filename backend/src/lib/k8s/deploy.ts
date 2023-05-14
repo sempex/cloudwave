@@ -3,7 +3,7 @@ import { V1Deployment, V1Ingress } from "@kubernetes/client-node";
 
 export default async function deploy(
   name: string,
-  container: { name: string; image: string }
+  image: string
 ) {
   const nameSpace = "default";
 
@@ -24,11 +24,11 @@ export default async function deploy(
         spec: {
           containers: [
             {
-              name: container.name,
-              image: container.image,
+              name: name,
+              image: image,
               ports: [
                 {
-                  containerPort: 80,
+                  containerPort: 3000,
                 },
               ],
             },
@@ -37,33 +37,25 @@ export default async function deploy(
       },
     },
     metadata: {
-      name: "my-deployment",
+      name: name,
     },
   };
 
   const ingressSpec: V1Ingress = {
-    apiVersion: "networking.k8s.io/v1",
-    kind: "Ingress",
     metadata: {
-      name: `ingress-${name}`,
-      labels: {
-        createdBy: "node-client",
-      },
-      annotations: {
-        "meta.helm.sh/release-namespace": "production-auto-deploy",
-      },
+      name: `${name}-ingress`,
     },
     spec: {
       ingressClassName: "nginx",
       rules: [
         {
-          host: `${name}`,
+          host: `${name}.cloudwave.local`,
           http: {
             paths: [
               {
                 backend: {
                   service: {
-                    name: `svc-${name}`,
+                    name: `${name}-svc`,
                     port: {
                       number: 80,
                     },
@@ -81,7 +73,7 @@ export default async function deploy(
 
   const serviceSpec = {
     metadata: {
-      name: `svc-${name}`,
+      name: `${name}-svc`,
     },
     spec: {
       selector: {
@@ -91,7 +83,7 @@ export default async function deploy(
         {
           name: "http",
           port: 80,
-          targetPort: 80,
+          targetPort: 3000,
         },
       ],
       type: "ClusterIP",
