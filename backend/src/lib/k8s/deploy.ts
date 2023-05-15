@@ -11,7 +11,7 @@ export default async function deploy(
   }
 ) {
   const nameSpace = "default";
-  const domain = "cloudwave.local";
+  const domain = "shiper.app";
   const appDomain = `${name}.${domain}`;
 
   const deploymentSpec: V1Deployment = {
