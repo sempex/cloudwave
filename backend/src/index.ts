@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use("/deploy", deployRouter);
 
 app.get("/", (req, res) => {
-  res.send("Express + TypeScript Server");
+  res.send("shiper.app API");
 });
 
 app.listen(port, () => {
