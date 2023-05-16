@@ -21,7 +21,7 @@ const post: Handler = async (req, res) => {
   });
 
   res.send({
-    url: "http://" + deployment.domain,
+    url: "https://" + deployment.domain,
   });
 };
 
