@@ -9,11 +9,6 @@ import connectDB from "./lib/db/prisma.js";
 import cors from "cors";
 import userRouter from "./api/user/user.router.js";
 
-export interface StatusRes {
-  status: "success" | "error";
-  message?: string;
-}
-
 dotenv.config();
 
 const app: Express = express();
