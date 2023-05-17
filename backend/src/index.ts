@@ -6,6 +6,7 @@ import expressSession from "express-session";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { PrismaClient } from "@prisma/client";
 import authRouter from "./api/auth/route.js";
+import passport from "./lib/auth/passport.js";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const app: Express = express();
 const port = process.env.PORT;
 const prisma = new PrismaClient();
 
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(
@@ -30,9 +32,11 @@ app.use(
     }),
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/deploy", deployRouter);
-app.use("/deploy", authRouter);
+app.use("/auth", authRouter);
 
 app.get("/", (req, res) => {
   res.send("shiper.app API");
