@@ -11,6 +11,9 @@ declare global {
       DATABASE_URL: string;
       GITHUB_CLIENT_SECRET: string;
       GITHUB_CLIENT_ID: string;
+      FRONTEND_ORIGIN: string;
+      TOKEN_EXPIRES_IN: number;
+      GITHUB_CALLBACK_URL: string;
     }
   }
 }
