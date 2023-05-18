@@ -25,7 +25,33 @@ model User {
   provider String  @default("local")
 
   createdAt DateTime
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime  @updatedAt
+  Project   Project[]
 
   @@map(name: "users")
+}
+
+model Project {
+  id           String       @id @default(uuid())
+  deploymentId String
+  userId       String
+  framework    String
+  User         User         @relation(fields: [userId], references: [id])
+  Deployment   Deployment[]
+}
+
+model Deployment {
+  id        String   @id
+  primary   Boolean
+  branch    String
+  Project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  Domain    Domain[]
+}
+
+model Domain {
+  name         String     @id
+  deploymentId String
+  default      Boolean    @default(true)
+  Deployment   Deployment @relation(fields: [deploymentId], references: [id])
 }

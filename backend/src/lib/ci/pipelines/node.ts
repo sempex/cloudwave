@@ -1,9 +1,15 @@
 import { connect } from "@dagger.io/dagger";
+import { Framework } from "./frameworks.js";
 
-export default async function node(
-  git: string,
-  name: string
-): Promise<null | string> {
+interface BuilderProps {
+  git: string;
+  name: string;
+}
+
+export default async function nodeBuilder({
+  git,
+  name,
+}: BuilderProps): Promise<null | string> {
   let image = null;
 
   await connect(
@@ -20,7 +26,6 @@ export default async function node(
         .withEntrypoint(["npm", "start"]);
 
       // execute
-      const version = await container.stdout();
 
       const imgRef = await container.publish(
         `ttl.sh/cloudwave-image-${name}:1h`
@@ -33,3 +38,22 @@ export default async function node(
 
   return image;
 }
+
+export const nodeFramework: Framework<BuilderProps> = {
+  builder: nodeBuilder,
+  displayName: "Basic Node app",
+  userInput: [
+    {
+      id: "buildCommand",
+      name: "Build Command",
+      required: false,
+      default: "npm run build",
+    },
+    {
+      id: "runCommand",
+      name: "Build Command",
+      required: false,
+      default: "npm start",
+    },
+  ],
+};
