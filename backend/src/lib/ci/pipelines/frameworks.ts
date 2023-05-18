@@ -12,16 +12,12 @@ export interface Framework<BuildProps> {
   }[];
 }
 
-// interface Frameworks {
-//     [key]
-// }
-
 export const frameworks = {
   node: nodeFramework,
-};
+} as const;
 
 const FrameworkTypeOptions = Object.keys(frameworks) as [string, ...string[]];
 
 export const FrameworkTypeOptionsEnum = z.enum(FrameworkTypeOptions);
 
-export type FrameworkType = z.infer<typeof FrameworkTypeOptionsEnum>;
+export type FrameworkType = keyof typeof frameworks;
