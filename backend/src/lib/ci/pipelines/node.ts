@@ -1,11 +1,41 @@
 import { connect } from "@dagger.io/dagger";
 import { BuildProps, Framework } from "./frameworks.js";
+import { z } from "zod";
+
+const buildOptionsValidator = z
+  .object({
+    buildCommand: z.string(),
+    runCommand: z.string(),
+  })
+  .optional();
+
+type NodeBuildProps = z.infer<typeof buildOptionsValidator>;
+
+export const nodeFramework: Framework<NodeBuildProps> = {
+  builder: nodeBuilder,
+  displayName: "Basic Node app",
+  buildOptionsValidator,
+  buildOptions: [
+    {
+      id: "buildCommand",
+      name: "Build Command",
+      required: false,
+      default: "npm run build",
+    },
+    {
+      id: "runCommand",
+      name: "Build Command",
+      required: false,
+      default: "npm start",
+    },
+  ],
+};
 
 export default async function nodeBuilder({
   git,
   name,
-  buildParameter,
-}: BuildProps): Promise<null | string> {
+  buildParameters,
+}: BuildProps<NodeBuildProps>): Promise<null | string> {
   let image = null;
 
   await connect(
@@ -34,22 +64,3 @@ export default async function nodeBuilder({
 
   return image;
 }
-
-export const nodeFramework: Framework = {
-  builder: nodeBuilder,
-  displayName: "Basic Node app",
-  buildOptions: [
-    {
-      id: "buildCommand",
-      name: "Build Command",
-      required: false,
-      default: "npm run build",
-    },
-    {
-      id: "runCommand",
-      name: "Build Command",
-      required: false,
-      default: "npm start",
-    },
-  ],
-};

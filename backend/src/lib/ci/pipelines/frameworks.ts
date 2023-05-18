@@ -1,16 +1,16 @@
-import { z } from "zod";
+import { ZodTypeAny, z } from "zod";
 import { nodeFramework } from "./node.js";
-import { CustomBuildParams } from "../../../api/deploy/handler.js";
 
-export interface Framework {
+export interface Framework<CustomBuildProps> {
   displayName: string;
-  builder: (props: BuildProps) => Promise<null | string>;
+  builder: (props: BuildProps<CustomBuildProps>) => Promise<null | string>;
   buildOptions: BuildPropOptions[];
+  buildOptionsValidator: ZodTypeAny;
 }
-export interface BuildProps {
+export interface BuildProps<CustomBuildProps> {
   git: string;
   name: string;
-  buildParameter?: CustomBuildParams;
+  buildParameters?: CustomBuildProps;
 }
 
 interface BuildPropOptions {
@@ -24,8 +24,11 @@ export const frameworks = {
   node: nodeFramework,
 } as const;
 
-const FrameworkTypeOptions = Object.keys(frameworks) as [string, ...string[]];
+export const buildParameterValidators = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("node"),
+    buildParameters: frameworks["node"].buildOptionsValidator,
+  }),
+]);
 
-export const FrameworkTypeOptionsEnum = z.enum(FrameworkTypeOptions);
-
-export type FrameworkType = keyof typeof frameworks;
+export type FrameworkTypes = keyof typeof frameworks;

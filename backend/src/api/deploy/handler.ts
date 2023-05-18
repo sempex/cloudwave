@@ -3,40 +3,29 @@ import deploy from "../../lib/k8s/deploy.js";
 import { z } from "zod";
 import statusRes from "../../lib/stautsRes.js";
 import {
-  FrameworkType,
-  FrameworkTypeOptionsEnum,
+  FrameworkTypes,
+  buildParameterValidators,
   frameworks,
 } from "../../lib/ci/pipelines/frameworks.js";
 
-const customParamsSchema = z
-  .array(
-    z.object({
-      id: z.string(),
-      value: z.string(),
-    })
-  )
-  .optional();
-
-export type CustomBuildParams = z.infer<typeof customParamsSchema>;
-
-const schema = z.object({
+const schemaBase = z.object({
   git: z.string().url(),
   name: z.string().min(5).max(20).toLowerCase(),
   appPort: z.number().max(65535).optional(),
-  type: FrameworkTypeOptionsEnum,
-  buildParameter: customParamsSchema,
 });
+
+const schema = buildParameterValidators.and(schemaBase);
 
 const post: Handler = async (req, res) => {
   try {
-    const { git, name, type, appPort, buildParameter } =
+    const { git, name, type, appPort, buildParameters } =
       await schema.parseAsync({
         ...req.body,
       });
 
-    const framework = frameworks[type as FrameworkType];
+    const framework = frameworks[type as FrameworkTypes];
 
-    const image = await framework.builder({ git, name, buildParameter });
+    const image = await framework.builder({ git, name, buildParameters });
 
     if (!image) return res.status(500).send("Image url could not be retrieved");
 
