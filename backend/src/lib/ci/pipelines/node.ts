@@ -31,7 +31,7 @@ export const nodeFramework: Framework<NodeBuildProps> = {
   ],
 };
 
-export default async function nodeBuilder({
+async function nodeBuilder({
   git,
   name,
   buildParameters,
