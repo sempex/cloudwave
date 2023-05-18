@@ -1,15 +1,11 @@
 import { connect } from "@dagger.io/dagger";
-import { Framework } from "./frameworks.js";
-
-interface BuilderProps {
-  git: string;
-  name: string;
-}
+import { BuildProps, Framework } from "./frameworks.js";
 
 export default async function nodeBuilder({
   git,
   name,
-}: BuilderProps): Promise<null | string> {
+  buildParameter,
+}: BuildProps): Promise<null | string> {
   let image = null;
 
   await connect(
@@ -39,10 +35,10 @@ export default async function nodeBuilder({
   return image;
 }
 
-export const nodeFramework: Framework<BuilderProps> = {
+export const nodeFramework: Framework = {
   builder: nodeBuilder,
   displayName: "Basic Node app",
-  userInput: [
+  buildOptions: [
     {
       id: "buildCommand",
       name: "Build Command",

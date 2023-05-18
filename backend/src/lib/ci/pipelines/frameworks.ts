@@ -1,15 +1,23 @@
 import { z } from "zod";
 import { nodeFramework } from "./node.js";
+import { CustomBuildParams } from "../../../api/deploy/handler.js";
 
-export interface Framework<BuildProps> {
+export interface Framework {
   displayName: string;
   builder: (props: BuildProps) => Promise<null | string>;
-  userInput?: {
-    id: string;
-    name: string;
-    required: boolean;
-    default?: string;
-  }[];
+  buildOptions: BuildPropOptions[];
+}
+export interface BuildProps {
+  git: string;
+  name: string;
+  buildParameter?: CustomBuildParams;
+}
+
+interface BuildPropOptions {
+  id: string;
+  name: string;
+  required: boolean;
+  default?: string;
 }
 
 export const frameworks = {

@@ -1,5 +1,4 @@
 import { Handler } from "express";
-import node from "../../lib/ci/pipelines/node.js";
 import deploy from "../../lib/k8s/deploy.js";
 import { z } from "zod";
 import statusRes from "../../lib/stautsRes.js";
@@ -9,22 +8,35 @@ import {
   frameworks,
 } from "../../lib/ci/pipelines/frameworks.js";
 
+const customParamsSchema = z
+  .array(
+    z.object({
+      id: z.string(),
+      value: z.string(),
+    })
+  )
+  .optional();
+
+export type CustomBuildParams = z.infer<typeof customParamsSchema>;
+
 const schema = z.object({
   git: z.string().url(),
   name: z.string().min(5).max(20).toLowerCase(),
   appPort: z.number().max(65535).optional(),
   type: FrameworkTypeOptionsEnum,
+  buildParameter: customParamsSchema,
 });
 
 const post: Handler = async (req, res) => {
   try {
-    const { git, name, type, appPort } = await schema.parseAsync({
-      ...req.body,
-    });
+    const { git, name, type, appPort, buildParameter } =
+      await schema.parseAsync({
+        ...req.body,
+      });
 
     const framework = frameworks[type as FrameworkType];
 
-    const image = await framework.builder({ git, name });
+    const image = await framework.builder({ git, name, buildParameter });
 
     if (!image) return res.status(500).send("Image url could not be retrieved");
 
