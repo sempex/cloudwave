@@ -30,12 +30,13 @@ model User {
 }
 
 model Project {
-  id         String       @id @default(cuid())
-  git        String
-  framework  String
-  userId     String
-  User       User         @relation(fields: [userId], references: [id])
-  Deployment Deployment[]
+  id          String       @id @default(cuid())
+  git         String
+  displayName String
+  framework   String
+  userId      String
+  User        User         @relation(fields: [userId], references: [id])
+  Deployment  Deployment[]
 }
 
 model Deployment {

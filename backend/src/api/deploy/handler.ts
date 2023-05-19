@@ -12,7 +12,8 @@ import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 
 const schemaBase = z.object({
   git: z.string().url(),
-  name: z.string().min(5).max(20).toLowerCase(),
+  name: z.string().min(5).max(30),
+  slug: z.string().max(30).optional(),
   appPort: z.number().max(65535).optional(),
   branch: z.string().optional().default("master"),
 });
@@ -21,18 +22,19 @@ const schema = buildParameterValidators.and(schemaBase);
 
 const post: Handler = async (req, res) => {
   try {
-    const { git, name, type, appPort, branch, buildParameters } =
+    const { git, name, type, slug, appPort, branch, buildParameters } =
       await schema.parseAsync({
         ...req.body,
       });
 
     const framework = frameworks[type as FrameworkTypes];
 
-    const subDomain = await uniqueDomain(name);
+    const subDomain = await uniqueDomain(slug || name);
 
     const project = await prisma.project.create({
       data: {
         framework: type,
+        displayName: name,
         git: git,
         Deployment: {
           create: {

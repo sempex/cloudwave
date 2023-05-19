@@ -3,7 +3,25 @@ import { MOUNTAINS } from "./suffixes.js";
 import { prisma } from "../db/prisma.js";
 import { nanoid } from "nanoid";
 
+/**
+ *
+ * @param base Some name to be converted to a slug
+ * @returns a unique slug and a non unique url safe name
+ */
 export default async function uniqueDomain(base: string) {
+  const initialSlug = slugify.default(base, {
+    replacement: "-",
+    lower: true,
+  });
+
+  const exists = await prisma.domain.findUnique({
+    where: {
+      name: initialSlug,
+    },
+  });
+
+  if (!exists) return { slug: initialSlug, urlSafeName: initialSlug };
+
   for (let i = 0; i <= 5; i++) {
     const slug = generateSlug(base);
 
