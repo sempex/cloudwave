@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import deployRouter from "./api/deploy/route.js";
+import deployRouter from "./api/project/route.js";
 import { PrismaClient } from "@prisma/client";
 import authRouter from "./api/auth/auth.route.js";
 import cookieParser from "cookie-parser";
@@ -26,7 +26,7 @@ app.use(
   })
 );
 
-app.use("/deploy", deployRouter);
+app.use("/project", deployRouter);
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { post } from "./handler.js";
+import { post } from "./project.handler.js";
 import { deserializeUser } from "../../middleware/deserializeUser.js";
 import { requireUser } from "../../middleware/requireUser.js";
 
