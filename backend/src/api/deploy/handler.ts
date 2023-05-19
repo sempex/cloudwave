@@ -7,6 +7,8 @@ import {
   buildParameterValidators,
   frameworks,
 } from "../../lib/ci/pipelines/frameworks.js";
+import { prisma } from "../../lib/db/prisma.js";
+import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 
 const schemaBase = z.object({
   git: z.string().url(),
@@ -26,11 +28,42 @@ const post: Handler = async (req, res) => {
 
     const framework = frameworks[type as FrameworkTypes];
 
-    const image = await framework.builder({ git, name, branch, buildParameters });
+    const subDomain = await uniqueDomain(name);
+
+    const project = await prisma.project.create({
+      data: {
+        framework: type,
+        git: git,
+        Deployment: {
+          create: {
+            branch: branch,
+            primary: true,
+            Domain: {
+              create: {
+                name: subDomain.slug,
+                default: true,
+              },
+            },
+          },
+        },
+        User: {
+          connect: {
+            id: res.locals.user.id,
+          },
+        },
+      },
+    });
+
+    const image = await framework.builder({
+      git,
+      name: subDomain.slug,
+      branch,
+      buildParameters,
+    });
 
     if (!image) return res.status(500).send("Image url could not be retrieved");
 
-    const deployment = await deploy(name, {
+    const deployment = await deploy(subDomain.slug, {
       image: image,
       appPort: appPort,
     });

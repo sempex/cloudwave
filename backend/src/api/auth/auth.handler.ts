@@ -56,7 +56,6 @@ export const githubOauthHandler = async (req: Request, res: Response) => {
         name: login,
         email,
         photo: avatar_url,
-        password: "",
         verified: true,
         provider: "GitHub",
       },

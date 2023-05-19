@@ -47,7 +47,7 @@ export const deserializeUser = async (
       });
     }
 
-    res.locals.user = exclude(user, ["password"]);
+    res.locals.user = user;
 
     next();
   } catch (err: any) {

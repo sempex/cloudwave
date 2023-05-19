@@ -15,15 +15,13 @@ model Session {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  name     String
-  email    String  @unique
-  password String
-  role     String  @default("user")
-  photo    String  @default("default.png")
-  verified Boolean @default(false)
-  provider String  @default("local")
-
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  role      Role      @default(user)
+  verified  Boolean   @default(false)
+  provider  String    @default("local")
+  photo     String
   createdAt DateTime
   updatedAt DateTime  @updatedAt
   Project   Project[]
@@ -32,16 +30,17 @@ model User {
 }
 
 model Project {
-  id           String       @id @default(uuid())
-  deploymentId String
-  userId       String
-  framework    String
-  User         User         @relation(fields: [userId], references: [id])
-  Deployment   Deployment[]
+  id         String       @id @default(cuid())
+  git        String
+  framework  String
+  userId     String
+  User       User         @relation(fields: [userId], references: [id])
+  Deployment Deployment[]
 }
 
 model Deployment {
-  id        String   @id
+  id        String   @id @default(cuid())
+  commit    String?
   primary   Boolean
   branch    String
   Project   Project  @relation(fields: [projectId], references: [id])
@@ -54,4 +53,9 @@ model Domain {
   deploymentId String
   default      Boolean    @default(true)
   Deployment   Deployment @relation(fields: [deploymentId], references: [id])
+}
+
+enum Role {
+  user
+  admin
 }
