@@ -1,5 +1,6 @@
 import { ZodTypeAny, z } from "zod";
 import { nodeFramework } from "./node.js";
+import { staticFramework } from "./static.js";
 
 export interface Framework<CustomBuildProps> {
   displayName: string;
@@ -10,6 +11,7 @@ export interface Framework<CustomBuildProps> {
 export interface BuildProps<CustomBuildProps> {
   git: string;
   name: string;
+  branch: string;
   buildParameters?: CustomBuildProps;
 }
 
@@ -22,12 +24,17 @@ interface BuildPropOptions {
 
 export const frameworks = {
   node: nodeFramework,
+  static: staticFramework,
 } as const;
 
 export const buildParameterValidators = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("node"),
     buildParameters: frameworks["node"].buildOptionsValidator,
+  }),
+  z.object({
+    type: z.literal("static"),
+    buildParameters: frameworks["static"].buildOptionsValidator,
   }),
 ]);
 

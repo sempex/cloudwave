@@ -12,20 +12,21 @@ const schemaBase = z.object({
   git: z.string().url(),
   name: z.string().min(5).max(20).toLowerCase(),
   appPort: z.number().max(65535).optional(),
+  branch: z.string().optional().default("master"),
 });
 
 const schema = buildParameterValidators.and(schemaBase);
 
 const post: Handler = async (req, res) => {
   try {
-    const { git, name, type, appPort, buildParameters } =
+    const { git, name, type, appPort, branch, buildParameters } =
       await schema.parseAsync({
         ...req.body,
       });
 
     const framework = frameworks[type as FrameworkTypes];
 
-    const image = await framework.builder({ git, name, buildParameters });
+    const image = await framework.builder({ git, name, branch, buildParameters });
 
     if (!image) return res.status(500).send("Image url could not be retrieved");
 
