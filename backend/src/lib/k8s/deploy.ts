@@ -101,7 +101,7 @@ export default async function deploy(
 
   const namespaceSpec = {
     metadata: {
-      name: config.projectId + "-" + config.userId,
+      name: config.userId,
     },
   };  
 
