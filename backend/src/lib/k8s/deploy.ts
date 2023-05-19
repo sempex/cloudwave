@@ -1,17 +1,19 @@
 import { apps, networking, core } from "./k8s.js";
 import { V1Deployment, V1Ingress } from "@kubernetes/client-node";
+import nsExists from "./nsExists.js";
 
-const DEFAULT_APP_PORT = 3000
+const DEFAULT_APP_PORT = 3000;
 
 export default async function deploy(
   name: string,
   config: {
     image: string;
+    userId: string;
+    projectId: string;
     appPort?: number;
   }
 ) {
-  const nameSpace = "default";
-  const domain = "shiper.app";
+  const domain = process.env.DOMAIN;
   const appDomain = `${name}.${domain}`;
 
   const deploymentSpec: V1Deployment = {
@@ -97,15 +99,28 @@ export default async function deploy(
     },
   };
 
+  const namespaceSpec = {
+    metadata: {
+      name: config.projectId + "-" + config.userId,
+    },
+  };  
+
+  if (!await nsExists(namespaceSpec.metadata.name)){
+    await core.createNamespace(namespaceSpec);
+  }
+
   const deployment = await apps.createNamespacedDeployment(
-    nameSpace,
+    namespaceSpec.metadata.name,
     deploymentSpec
   );
 
-  const service = await core.createNamespacedService(nameSpace, serviceSpec);
+  const service = await core.createNamespacedService(
+    namespaceSpec.metadata.name,
+    serviceSpec
+  );
 
   const ingress = await networking.createNamespacedIngress(
-    nameSpace,
+    namespaceSpec.metadata.name,
     ingressSpec
   );
 

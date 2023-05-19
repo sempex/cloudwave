@@ -42,7 +42,7 @@ const post: Handler = async (req, res) => {
             primary: true,
             Domain: {
               create: {
-                name: subDomain.slug,
+                name: `${subDomain.slug}.${process.env.DOMAIN}`,
                 default: true,
               },
             },
@@ -66,6 +66,8 @@ const post: Handler = async (req, res) => {
     if (!image) return res.status(500).send("Image url could not be retrieved");
 
     const deployment = await deploy(subDomain.slug, {
+      userId: res.locals.user.id,
+      projectId: project.id,
       image: image,
       appPort: appPort,
     });

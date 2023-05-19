@@ -14,6 +14,7 @@ declare global {
       FRONTEND_ORIGIN: string;
       TOKEN_EXPIRES_IN: number;
       GITHUB_CALLBACK_URL: string;
+      DOMAIN: string;
     }
   }
 }

@@ -16,7 +16,7 @@ export default async function uniqueDomain(base: string) {
 
   const exists = await prisma.domain.findUnique({
     where: {
-      name: initialSlug,
+      name: `${initialSlug}.${process.env.DOMAIN}`,
     },
   });
 
@@ -27,7 +27,7 @@ export default async function uniqueDomain(base: string) {
 
     const exists = await prisma.domain.findUnique({
       where: {
-        name: slug.slug,
+        name: `${slug.slug}.${process.env.DOMAIN}`,
       },
     });
 

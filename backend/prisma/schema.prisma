@@ -35,6 +35,7 @@ model Project {
   displayName String
   framework   String
   userId      String
+  createdAt   DateTime     @default(now())
   User        User         @relation(fields: [userId], references: [id])
   Deployment  Deployment[]
 }
