@@ -52,10 +52,15 @@ async function nodeBuilder({
         .withEntrypoint(["npm", "start"]);
 
       // execute
+      const secret = client.setSecret("sec", process.env.REGISTRY_PASSWORD);
 
-      const imgRef = await container.publish(
-        `ttl.sh/cloudwave-image-${name}:1h`
-      );
+      const imgRef = await container
+        .withRegistryAuth(
+          process.env.REGISTRY_URL,
+          process.env.REGISTRY_USERNAME,
+          secret
+        )
+        .publish(`${process.env.REGISTRY_URL}/shiper-${name}`);
 
       image = imgRef;
     },

@@ -1,6 +1,7 @@
 import { apps, networking, core } from "./k8s.js";
 import { V1Deployment, V1Ingress } from "@kubernetes/client-node";
 import nsExists from "./nsExists.js";
+import createRegistrySecret from "./createRegistrySecret.js";
 
 const DEFAULT_APP_PORT = 3000;
 
@@ -15,6 +16,19 @@ export default async function deploy(
 ) {
   const domain = process.env.DOMAIN;
   const appDomain = `${name}.${domain}`;
+
+  const SECRET_NAME = "registry-creds";
+
+  const namespaceSpec = {
+    metadata: {
+      name: config.userId,
+    },
+  };
+
+  await createRegistrySecret(
+    SECRET_NAME,
+    namespaceSpec.metadata.name
+  );
 
   const deploymentSpec: V1Deployment = {
     spec: {
@@ -40,6 +54,11 @@ export default async function deploy(
                   containerPort: config.appPort || DEFAULT_APP_PORT,
                 },
               ],
+            },
+          ],
+          imagePullSecrets: [
+            {
+              name: SECRET_NAME,
             },
           ],
         },
@@ -99,13 +118,7 @@ export default async function deploy(
     },
   };
 
-  const namespaceSpec = {
-    metadata: {
-      name: config.userId,
-    },
-  };  
-
-  if (!await nsExists(namespaceSpec.metadata.name)){
+  if (!(await nsExists(namespaceSpec.metadata.name))) {
     await core.createNamespace(namespaceSpec);
   }
 

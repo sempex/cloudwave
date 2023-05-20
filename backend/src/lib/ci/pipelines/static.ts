@@ -36,11 +36,17 @@ async function staticBuilder({
 
       // execute
 
-      const imgRef = await container.publish(
-        `ttl.sh/cloudwave-image-${name}:1h`
-      );
+      const secret = client.setSecret("sec", process.env.REGISTRY_PASSWORD);
 
+      const imgRef = await container
+        .withRegistryAuth(
+          process.env.REGISTRY_URL,
+          process.env.REGISTRY_USERNAME,
+          secret
+        )
+        .publish(`${process.env.REGISTRY_URL}/shiper-${name}`);
       image = imgRef;
+      
     },
     { LogOutput: process.stdout }
   );
