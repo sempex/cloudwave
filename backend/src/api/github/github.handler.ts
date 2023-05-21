@@ -76,13 +76,6 @@ export const webhookHandler: Handler = async (req, res) => {
 
       break;
     case "installation":
-      const { installation, action } = req.body;
-
-      if (action === "created")
-        await updateInstallation("Eon.sberk@gmail.com", installation.id);
-      if (action === "deleted")
-        await updateInstallation("Eon.sberk@gmail.com", null);
-
       res.send("installation updated");
       break;
     default:

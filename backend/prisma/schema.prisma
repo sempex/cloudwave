@@ -21,7 +21,6 @@ model User {
   role           Role      @default(user)
   verified       Boolean   @default(false)
   provider       String    @default("local")
-  installationId Int?
   photo          String
   createdAt      DateTime
   updatedAt      DateTime  @updatedAt
