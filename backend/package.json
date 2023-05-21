@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@kubernetes/client-node": "^0.18.1",
+    "@octokit/app": "^13.1.4",
     "@prisma/client": "^4.14.0",
     "axios": "^1.4.0",
     "body-parser": "^1.20.2",

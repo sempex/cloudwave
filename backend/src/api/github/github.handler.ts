@@ -6,8 +6,14 @@ import {
 } from "../../lib/ci/pipelines/frameworks.js";
 import deploy from "../../lib/k8s/deploy.js";
 import { globalConfig } from "../../lib/config.js";
+import { getInstallation } from "../../lib/github/index.js";
+import { updateInstallation } from "../../lib/github/updateInstallation.js";
 
 export const webhookHandler: Handler = async (req, res) => {
+  const { installation } = req.body;
+
+  const octokit = await getInstallation(installation.id);
+
   switch (req.headers["x-github-event"]) {
     case "push":
       const { ref, repository, head_commit } = req.body;
@@ -63,8 +69,18 @@ export const webhookHandler: Handler = async (req, res) => {
       console.log(dbDeployment);
 
       break;
+    case "installation":
+      const { installation, action } = req.body;
+
+      if (action === "created")
+        await updateInstallation("Eon.sberk@gmail.com", installation.id);
+      if (action === "deleted")
+        await updateInstallation("Eon.sberk@gmail.com", null);
+
+      res.send("installation updated");
+      break;
     default:
-      console.log("unhandled event");
+      console.log("unhandled event", req.headers["x-github-event"]);
   }
 
   res.send("ok");
