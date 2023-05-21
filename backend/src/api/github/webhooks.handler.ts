@@ -6,8 +6,6 @@ import {
 } from "../../lib/ci/pipelines/frameworks.js";
 import deploy from "../../lib/k8s/deploy.js";
 import { globalConfig } from "../../lib/config.js";
-import { getInstallation } from "../../lib/github/index.js";
-import { updateInstallation } from "../../lib/github/updateInstallation.js";
 import {
   changeDeploymentState,
   createDeployment,
@@ -75,12 +73,15 @@ export const webhookHandler: Handler = async (req, res) => {
         },
       });
 
-      // await changeDeploymentState(req.body.installation.id, {
-      //   deploymentId: githubDeployment.data?.id,
-      //   owner: repository.owner.name,
-      //   repo: repository.name,
-      //   state: "success",
-      // });
+      if (githubDeployment.data)
+        await changeDeploymentState(req.body.installation.id, {
+          //@ts-ignore
+          deploymentId: githubDeployment.data.id,
+          owner: repository.owner.name,
+          repo: repository.name,
+          logUrl: "https://" + subdomain + "." + process.env.DOMAIN,
+          state: "success",
+        });
 
       break;
     case "installation":

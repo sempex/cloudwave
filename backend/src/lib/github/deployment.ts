@@ -4,6 +4,7 @@ interface ChangeDeploymentStateConfig {
   deploymentId: number;
   repo: string;
   owner: string;
+  logUrl?: string;
   state:
     | "error"
     | "failure"
@@ -34,12 +35,13 @@ export const changeDeploymentState = async (
   config: ChangeDeploymentStateConfig
 ) => {
   const octokit = await getInstallation(installationId);
-  const { deploymentId, repo, state, owner } = config;
+  const { deploymentId, repo, state, owner, logUrl } = config;
 
   return await octokit.repos.createDeploymentStatus({
     deployment_id: deploymentId,
     owner,
     repo,
     state,
+    log_url: logUrl,
   });
 };
