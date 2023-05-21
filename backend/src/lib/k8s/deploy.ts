@@ -25,10 +25,11 @@ export default async function deploy(
     },
   };
 
-  await createRegistrySecret(
-    SECRET_NAME,
-    namespaceSpec.metadata.name
-  );
+  if (!(await nsExists(namespaceSpec.metadata.name))) {
+    await core.createNamespace(namespaceSpec);
+  }
+
+  await createRegistrySecret(SECRET_NAME, namespaceSpec.metadata.name);
 
   const deploymentSpec: V1Deployment = {
     spec: {
@@ -117,10 +118,6 @@ export default async function deploy(
       type: "ClusterIP",
     },
   };
-
-  if (!(await nsExists(namespaceSpec.metadata.name))) {
-    await core.createNamespace(namespaceSpec);
-  }
 
   const deployment = await apps.createNamespacedDeployment(
     namespaceSpec.metadata.name,
