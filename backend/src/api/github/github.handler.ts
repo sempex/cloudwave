@@ -8,12 +8,9 @@ import deploy from "../../lib/k8s/deploy.js";
 import { globalConfig } from "../../lib/config.js";
 import { getInstallation } from "../../lib/github/index.js";
 import { updateInstallation } from "../../lib/github/updateInstallation.js";
+import createDeployment from "../../lib/github/createDeployment.js";
 
 export const webhookHandler: Handler = async (req, res) => {
-  const { installation } = req.body;
-
-  const octokit = await getInstallation(installation.id);
-
   switch (req.headers["x-github-event"]) {
     case "push":
       const { ref, repository, head_commit } = req.body;
@@ -27,6 +24,15 @@ export const webhookHandler: Handler = async (req, res) => {
       });
 
       if (!project) return res.status(500).send("Repo not registered");
+
+      const githubDeployment = await createDeployment(
+        req.body.installation.id,
+        repository.name,
+        repository.owner.name,
+        ref
+      );
+
+      console.log(githubDeployment);
 
       const framework = frameworks[project?.framework as FrameworkTypes];
 
