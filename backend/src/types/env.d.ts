@@ -15,7 +15,6 @@ declare global {
       TOKEN_EXPIRES_IN: number;
       GITHUB_CALLBACK_URL: string;
       DOMAIN: string;
-      GITHUB_BASE_URL: string;
     }
   }
 }

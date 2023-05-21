@@ -31,13 +31,15 @@ model User {
 
 model Project {
   id          String       @id @default(cuid())
-  git         String
+  repository  String
   displayName String
   framework   String
   userId      String
   createdAt   DateTime     @default(now())
-  User        User         @relation(fields: [userId], references: [id])
+  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   Deployment  Deployment[]
+
+  @@unique([repository, userId])
 }
 
 model Deployment {
@@ -45,7 +47,7 @@ model Deployment {
   commit    String?
   primary   Boolean
   branch    String
-  Project   Project  @relation(fields: [projectId], references: [id])
+  Project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String
   Domain    Domain[]
 }
@@ -54,7 +56,7 @@ model Domain {
   name         String     @id
   deploymentId String
   default      Boolean    @default(true)
-  Deployment   Deployment @relation(fields: [deploymentId], references: [id])
+  Deployment   Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

@@ -9,9 +9,10 @@ import {
 } from "../../lib/ci/pipelines/frameworks.js";
 import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
+import { globalConfig } from "../../lib/config.js";
 
 const schemaBase = z.object({
-  git: z.string(),
+  repositoryName: z.string(),
   name: z.string().min(5).max(30),
   slug: z.string().max(30).optional(),
   appPort: z.number().max(65535).optional(),
@@ -22,10 +23,19 @@ const schema = buildParameterValidators.and(schemaBase);
 
 const post: Handler = async (req, res) => {
   try {
-    const { git, name, type, slug, appPort, branch, buildParameters } =
-      await schema.parseAsync({
-        ...req.body,
-      });
+    const {
+      repositoryName,
+      name,
+      type,
+      slug,
+      appPort,
+      branch,
+      buildParameters,
+    } = await schema.parseAsync({
+      ...req.body,
+    });
+
+    const gitUrl = globalConfig.git.githubBaseUrl + "/" + repositoryName;
 
     const framework = frameworks[type as FrameworkTypes];
 
@@ -35,7 +45,7 @@ const post: Handler = async (req, res) => {
       data: {
         framework: type,
         displayName: name,
-        git: git,
+        repository: repositoryName,
         Deployment: {
           create: {
             branch: branch,
@@ -57,7 +67,7 @@ const post: Handler = async (req, res) => {
     });
 
     const image = await framework.builder({
-      git,
+      git: gitUrl,
       name: subDomain.slug,
       branch,
       buildParameters,

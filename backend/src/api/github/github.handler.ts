@@ -5,6 +5,7 @@ import {
   frameworks,
 } from "../../lib/ci/pipelines/frameworks.js";
 import deploy from "../../lib/k8s/deploy.js";
+import { globalConfig } from "../../lib/config.js";
 
 export const webhookHandler: Handler = async (req, res) => {
   switch (req.headers["x-github-event"]) {
@@ -14,22 +15,20 @@ export const webhookHandler: Handler = async (req, res) => {
       const branch = ref.split("/").at(-1);
 
       const project = await prisma.project.findFirst({
-        where: { git: repository.full_name },
+        where: {
+          repository: repository.full_name,
+        },
       });
 
-      if (!project) return;
+      if (!project) return res.status(500).send("Repo not registered");
 
       const framework = frameworks[project?.framework as FrameworkTypes];
-
-      console.log(framework);
 
       const subdomain =
         `${repository.owner.name}-${head_commit.id}-${branch}`.toLowerCase();
 
-      console.log(project);
-
       const image = await framework.builder({
-        git: repository.full_name,
+        git: globalConfig.git.githubBaseUrl + "/" + repository.full_name,
         name: subdomain,
         branch,
       });
@@ -43,7 +42,25 @@ export const webhookHandler: Handler = async (req, res) => {
         image: image,
       });
 
-      console.log(subdomain);
+      const dbDeployment = await prisma.deployment.create({
+        data: {
+          branch: branch,
+          primary: false,
+          commit: head_commit.id,
+          Domain: {
+            create: {
+              name: `${subdomain}.${process.env.DOMAIN}`,
+            },
+          },
+          Project: {
+            connect: {
+              id: project.id,
+            },
+          },
+        },
+      });
+
+      console.log(dbDeployment);
 
       break;
     default:

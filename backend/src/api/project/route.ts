@@ -7,6 +7,6 @@ const deployRouter = Router();
 
 deployRouter.use(deserializeUser, requireUser);
 
-deployRouter.post("/", post);
+deployRouter.post("/init", post);
 
 export default deployRouter;
