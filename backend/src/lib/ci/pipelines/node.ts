@@ -40,7 +40,10 @@ async function nodeBuilder({
 
   await connect(
     async (client) => {
-      const src = client.git(git).branch("master").tree();
+      const src = client
+        .git(process.env.GITHUB_BASE_URL + "/" + git)
+        .branch("master")
+        .tree();
       // use a node:16-slim container
       // get version
       const container = client

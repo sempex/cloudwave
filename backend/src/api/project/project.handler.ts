@@ -11,7 +11,7 @@ import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 
 const schemaBase = z.object({
-  git: z.string().url(),
+  git: z.string(),
   name: z.string().min(5).max(30),
   slug: z.string().max(30).optional(),
   appPort: z.number().max(65535).optional(),

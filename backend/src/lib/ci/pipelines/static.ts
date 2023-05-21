@@ -22,7 +22,7 @@ async function staticBuilder({
 
   await connect(
     async (client) => {
-      const src = client.git(git).branch(branch).tree();
+      const src = client.git(process.env.GITHUB_BASE_URL + "/" + git).branch(branch).tree();
       // use a node:16-slim container
       // get version
       const container = client

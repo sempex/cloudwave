@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./lib/db/prisma.js";
 import cors from "cors";
 import userRouter from "./api/user/user.router.js";
+import githubRouter from "./api/github/github.router.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use(
 app.use("/project", deployRouter);
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/github", githubRouter);
 
 app.get("/", (req, res) => {
   res.send("shiper.app API");
