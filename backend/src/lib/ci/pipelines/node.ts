@@ -34,16 +34,14 @@ export const nodeFramework: Framework<NodeBuildProps> = {
 async function nodeBuilder({
   git,
   name,
+  branch,
   buildParameters,
 }: BuildProps<NodeBuildProps>): Promise<null | string> {
   let image = null;
 
   await connect(
     async (client) => {
-      const src = client
-        .git(process.env.GITHUB_BASE_URL + "/" + git)
-        .branch("master")
-        .tree();
+      const src = client.git(git).branch(branch).tree();
       // use a node:16-slim container
       // get version
       const container = client
