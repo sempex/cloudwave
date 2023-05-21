@@ -2,6 +2,7 @@ import { apps, networking, core } from "./k8s.js";
 import { V1Deployment, V1Ingress } from "@kubernetes/client-node";
 import nsExists from "./nsExists.js";
 import createRegistrySecret from "./createRegistrySecret.js";
+import { globalConfig } from "../config.js";
 
 const DEFAULT_APP_PORT = 3000;
 
@@ -72,7 +73,7 @@ export default async function deploy(
 
   const ingressSpec: V1Ingress = {
     metadata: {
-      name: `${name}-ingress`,
+      name: `${name}-${globalConfig.k8s.ingressSuffix}`,
     },
     spec: {
       ingressClassName: "nginx",
@@ -84,7 +85,7 @@ export default async function deploy(
               {
                 backend: {
                   service: {
-                    name: `${name}-svc`,
+                    name: `${name}-${globalConfig.k8s.svcSuffix}`,
                     port: {
                       number: 80,
                     },
@@ -102,7 +103,7 @@ export default async function deploy(
 
   const serviceSpec = {
     metadata: {
-      name: `${name}-svc`,
+      name: `${name}-${globalConfig.k8s.svcSuffix}`,
     },
     spec: {
       selector: {
