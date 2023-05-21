@@ -8,7 +8,10 @@ import deploy from "../../lib/k8s/deploy.js";
 import { globalConfig } from "../../lib/config.js";
 import { getInstallation } from "../../lib/github/index.js";
 import { updateInstallation } from "../../lib/github/updateInstallation.js";
-import createDeployment from "../../lib/github/createDeployment.js";
+import {
+  changeDeploymentState,
+  createDeployment,
+} from "../../lib/github/deployment.js";
 
 export const webhookHandler: Handler = async (req, res) => {
   switch (req.headers["x-github-event"]) {
@@ -32,7 +35,7 @@ export const webhookHandler: Handler = async (req, res) => {
         ref
       );
 
-      console.log(githubDeployment);
+      console.log(githubDeployment.data);
 
       const framework = frameworks[project?.framework as FrameworkTypes];
 
@@ -72,7 +75,12 @@ export const webhookHandler: Handler = async (req, res) => {
         },
       });
 
-      console.log(dbDeployment);
+      // await changeDeploymentState(req.body.installation.id, {
+      //   deploymentId: githubDeployment.data?.id,
+      //   owner: repository.owner.name,
+      //   repo: repository.name,
+      //   state: "success",
+      // });
 
       break;
     case "installation":

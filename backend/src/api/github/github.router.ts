@@ -1,7 +1,5 @@
 import { Router } from "express";
-import { deserializeUser } from "../../middleware/deserializeUser.js";
-import { requireUser } from "../../middleware/requireUser.js";
-import { webhookHandler } from "./github.handler.js";
+import { webhookHandler } from "./webhooks.handler.js";
 
 const githubRouter = Router();
 
