@@ -30,16 +30,17 @@ model User {
 }
 
 model Project {
-  id          String       @id @default(cuid())
-  repository  String
-  displayName String
-  framework   String
-  userId      String
-  slug        String
-  createdAt   DateTime     @default(now())
-  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Deployment  Deployment[]
-  Domain      Domain[]
+  id             String           @id @default(cuid())
+  repository     String
+  displayName    String
+  framework      String
+  userId         String
+  slug           String
+  createdAt      DateTime         @default(now())
+  User           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Deployment     Deployment[]
+  Domain         Domain[]
+  BuildParameter BuildParameter[]
 
   @@unique([repository, userId])
 }
@@ -60,6 +61,14 @@ model Domain {
   default   Boolean @default(true)
   Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String
+}
+
+model BuildParameter {
+  Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  key       String
+  value     String
+  @@unique([projectId, key, value])
 }
 
 enum Role {
