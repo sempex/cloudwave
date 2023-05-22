@@ -47,7 +47,11 @@ export const githubOauthHandler = async (req: Request, res: Response) => {
 
     const { access_token } = await getGithubOathToken({ code });
 
-    const { email, avatar_url, login } = await getGithubUser({ access_token });
+    const { email, avatar_url, login, id,  } = await getGithubUser({
+      access_token,
+    });
+
+    console.log(id);
 
     const user = await prisma.user.upsert({
       where: { email },

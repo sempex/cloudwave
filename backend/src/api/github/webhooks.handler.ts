@@ -13,15 +13,16 @@ import {
 import deleteIngress from "../../lib/k8s/deleteIngress.js";
 import createIngress from "../../lib/k8s/createIngress.js";
 import { customAlphabet } from "nanoid";
+import { PushEvent } from "@octokit/webhooks-types";
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvw", 10);
 
 export const webhookHandler: Handler = async (req, res) => {
   switch (req.headers["x-github-event"]) {
     case "push":
-      const { ref, repository, head_commit } = req.body;
+      const { ref, repository, head_commit } = req.body as PushEvent;
 
-      const branch = ref.split("/").at(-1);
+      const branch = ref.split("/").at(-1) || "master";
 
       const project = await prisma.project.findFirst({
         where: {
@@ -37,7 +38,7 @@ export const webhookHandler: Handler = async (req, res) => {
       const githubDeployment = await createDeployment(
         req.body.installation.id,
         repository.name,
-        repository.owner.name,
+        repository.owner.name || "",
         ref
       );
 
@@ -71,7 +72,7 @@ export const webhookHandler: Handler = async (req, res) => {
         data: {
           branch: branch,
           primary: false,
-          commit: head_commit.id,
+          commit: head_commit?.id,
           Project: {
             connect: {
               id: project.id,
@@ -111,7 +112,7 @@ export const webhookHandler: Handler = async (req, res) => {
         await changeDeploymentState(req.body.installation.id, {
           //@ts-ignore
           deploymentId: githubDeployment.data.id,
-          owner: repository.owner.name,
+          owner: repository.owner.name || "",
           repo: repository.name,
           logUrl: "https://" + commitDomain,
           state: "success",
