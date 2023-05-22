@@ -16,6 +16,7 @@ model Session {
 
 model User {
   id        String    @id @default(cuid())
+  githubId  String?
   name      String
   email     String    @unique
   role      Role      @default(user)
@@ -68,6 +69,7 @@ model BuildParameter {
   projectId String
   key       String
   value     String
+
   @@unique([projectId, key, value])
 }
 

@@ -47,7 +47,7 @@ export const githubOauthHandler = async (req: Request, res: Response) => {
 
     const { access_token } = await getGithubOathToken({ code });
 
-    const { email, avatar_url, login, id,  } = await getGithubUser({
+    const { email, avatar_url, login, id } = await getGithubUser({
       access_token,
     });
 
@@ -58,6 +58,7 @@ export const githubOauthHandler = async (req: Request, res: Response) => {
       create: {
         createdAt: new Date(),
         name: login,
+        githubId: String(id),
         email,
         photo: avatar_url,
         verified: true,
