@@ -1,5 +1,5 @@
 import { apps, networking, core } from "./k8s.js";
-import { V1Deployment, V1Ingress } from "@kubernetes/client-node";
+import { V1Deployment, V1Ingress, V1Secret } from "@kubernetes/client-node";
 import nsExists from "./nsExists.js";
 import createRegistrySecret from "./createRegistrySecret.js";
 import { globalConfig } from "../config.js";
@@ -13,6 +13,10 @@ export default async function deploy(
     userId: string;
     projectId: string;
     appPort?: number;
+    secret?: {
+      name: string;
+      value: string;
+    }[]
   }
 ) {
   const domain = process.env.DOMAIN;
@@ -120,6 +124,19 @@ export default async function deploy(
     },
   };
 
+  const secretSpec: V1Secret = {
+    apiVersion: "v1",
+    kind: "Secret",
+    metadata: {
+      name: config?.secret?.[0].name,
+      namespace: namespaceSpec.metadata.name,
+    },
+    type: 'Opaque',
+    data: config?.secret?.[0]
+  }
+
+
+
   const deployment = await apps.createNamespacedDeployment(
     namespaceSpec.metadata.name,
     deploymentSpec
@@ -134,10 +151,17 @@ export default async function deploy(
     namespaceSpec.metadata.name,
     ingressSpec
   );
+    
+  const secret = await core.createNamespacedSecret(
+      namespaceSpec.metadata.name,
+      secretSpec
+  );
+
 
   return {
     deployment,
     ingress,
+    secret,
     service,
     domain: appDomain,
   };

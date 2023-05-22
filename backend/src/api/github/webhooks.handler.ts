@@ -12,6 +12,7 @@ import {
   changeDeploymentState,
   createDeployment,
 } from "../../lib/github/deployment.js";
+import { V1Secret } from "@kubernetes/client-node";
 
 export const webhookHandler: Handler = async (req, res) => {
   switch (req.headers["x-github-event"]) {
@@ -55,6 +56,10 @@ export const webhookHandler: Handler = async (req, res) => {
         userId: project.userId,
         projectId: project.id,
         image: image,
+        secret: [{
+          name: "mysecret",
+          value: "1234qwer"
+        }]
       });
 
       const dbDeployment = await prisma.deployment.create({
