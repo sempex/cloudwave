@@ -168,7 +168,7 @@ export default async function deploy(
       apiVersion: "v1",
       kind: "Secret",
       metadata: {
-        name: sec.key,
+        name: globalConfig.k8s.evnSecretPrefix + "-" + sec.key,
         namespace: namespaceSpec.metadata.name,
       },
       type: "Opaque",
