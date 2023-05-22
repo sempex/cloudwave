@@ -57,7 +57,7 @@ export const webhookHandler: Handler = async (req, res) => {
         projectId: project.id,
         image: image,
         secret: [{
-          name: "mysecret",
+          key: "mysecret",
           value: "1234qwer"
         }]
       });
