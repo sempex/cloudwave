@@ -80,6 +80,7 @@ const post: Handler = async (req, res) => {
       projectId: project.id,
       image: image,
       appPort: appPort,
+      secret: [{key: "zero", value: "password"}, {key: "huan", value:"ming"}]
     });
 
     res.send({

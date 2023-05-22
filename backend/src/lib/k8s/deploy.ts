@@ -14,7 +14,7 @@ export default async function deploy(
     projectId: string;
     appPort?: number;
     secret?: {
-      name: string;
+      key: string;
       value: string;
     }[]
   }
@@ -124,16 +124,6 @@ export default async function deploy(
     },
   };
 
-  const secretSpec: V1Secret = {
-    apiVersion: "v1",
-    kind: "Secret",
-    metadata: {
-      name: config?.secret?.[0].name,
-      namespace: namespaceSpec.metadata.name,
-    },
-    type: 'Opaque',
-    data: config?.secret?.[0]
-  }
 
 
 
@@ -152,17 +142,31 @@ export default async function deploy(
     ingressSpec
   );
     
-  const secret = await core.createNamespacedSecret(
-      namespaceSpec.metadata.name,
-      secretSpec
-  );
+  let secrets = []
+  for (let i = 0; i < (config?.secret?.length || 0); i++ ) {
+    const secretSpec: V1Secret = {
+      apiVersion: "v1",
+      kind: "Secret",
+      metadata: {
+        name: config?.secret?.[i].key,
+        namespace: namespaceSpec.metadata.name,
+      },
+      type: 'Opaque',
+      data: config?.secret?.[i]
+    }  
+    const secret = await core.createNamespacedSecret(
+        namespaceSpec.metadata.name,
+        secretSpec
+    );
+    secrets.push(secret)
+  }
 
 
   return {
     deployment,
     ingress,
-    secret,
     service,
+    secrets,
     domain: appDomain,
   };
 }
