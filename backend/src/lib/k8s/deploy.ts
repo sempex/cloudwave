@@ -16,7 +16,7 @@ export default async function deploy(
     secret?: {
       key: string;
       value: string;
-    }[]
+    }[];
   }
 ) {
   const domain = process.env.DOMAIN;
@@ -124,9 +124,6 @@ export default async function deploy(
     },
   };
 
-
-
-
   const deployment = await apps.createNamespacedDeployment(
     namespaceSpec.metadata.name,
     deploymentSpec
@@ -141,32 +138,46 @@ export default async function deploy(
     namespaceSpec.metadata.name,
     ingressSpec
   );
-    
-  let secrets = []
-  for (let i = 0; i < (config?.secret?.length || 0); i++ ) {
+
+  // let secrets = []
+  // for (let i = 0; i < (config.secret?.length || 0); i++ ) {
+  //   const secretSpec: V1Secret = {
+  //     apiVersion: "v1",
+  //     kind: "Secret",
+  //     metadata: {
+  //       name: config?.secret?.[i].key,
+  //       namespace: namespaceSpec.metadata.name,
+  //     },
+  //     type: 'Opaque',
+  //     data: config?.secret?.[i]
+  //   }
+  //   const secret = await core.createNamespacedSecret(
+  //       namespaceSpec.metadata.name,
+  //       secretSpec
+  //   );
+  //   secrets.push(secret)
+  // }
+
+  if (!config.secret)
+    return {
+      domain: appDomain,
+    };
+
+  for (const sec of config.secret) {
     const secretSpec: V1Secret = {
       apiVersion: "v1",
       kind: "Secret",
       metadata: {
-        name: config?.secret?.[i].key,
+        name: sec.key,
         namespace: namespaceSpec.metadata.name,
       },
-      type: 'Opaque',
-      data: config?.secret?.[i]
-    }  
-    const secret = await core.createNamespacedSecret(
-        namespaceSpec.metadata.name,
-        secretSpec
-    );
-    secrets.push(secret)
+      type: "Opaque",
+      data: sec,
+    };
+    await core.createNamespacedSecret(namespaceSpec.metadata.name, secretSpec);
   }
 
-
   return {
-    deployment,
-    ingress,
-    service,
-    secrets,
     domain: appDomain,
   };
 }
