@@ -43,5 +43,6 @@ export const changeDeploymentState = async (
     repo,
     state,
     log_url: logUrl,
+    auto_inactive: false,
   });
 };

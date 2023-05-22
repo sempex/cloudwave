@@ -10,6 +10,7 @@ import {
 import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 import { globalConfig } from "../../lib/config.js";
+import createIngress from "../../lib/k8s/createIngress.js";
 
 const schemaBase = z.object({
   repositoryName: z.string(),
@@ -41,21 +42,24 @@ const post: Handler = async (req, res) => {
 
     const subDomain = await uniqueDomain(slug || name);
 
+    const domain = `${subDomain.slug}.${process.env.DOMAIN}`;
+
     const project = await prisma.project.create({
       data: {
         framework: type,
         displayName: name,
+        slug: subDomain.slug,
         repository: repositoryName,
         Deployment: {
           create: {
             branch: branch,
             primary: true,
-            Domain: {
-              create: {
-                name: `${subDomain.slug}.${process.env.DOMAIN}`,
-                default: true,
-              },
-            },
+          },
+        },
+        Domain: {
+          create: {
+            name: domain,
+            default: true,
           },
         },
         User: {
@@ -63,6 +67,9 @@ const post: Handler = async (req, res) => {
             id: res.locals.user.id,
           },
         },
+      },
+      include: {
+        Deployment: true,
       },
     });
 
@@ -75,15 +82,21 @@ const post: Handler = async (req, res) => {
 
     if (!image) return res.status(500).send("Image url could not be retrieved");
 
-    const deployment = await deploy(subDomain.slug, {
-      userId: res.locals.user.id,
-      projectId: project.id,
+    const deployment = await deploy(project.Deployment[0].id, {
+      namespace: res.locals.user.id,
       image: image,
       appPort: appPort,
     });
 
+    const ingress = await createIngress({
+      ns: res.locals.user.id,
+      domains: [domain],
+      main: true,
+      name: project.Deployment[0].id,
+    });
+
     res.send({
-      url: "https://" + deployment.domain,
+      url: "https://" + ingress.domains[0],
     });
   } catch (err: any) {
     res.status(400).send(statusRes("error", err));

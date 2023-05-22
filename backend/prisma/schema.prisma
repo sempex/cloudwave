@@ -15,16 +15,16 @@ model Session {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  name           String
-  email          String    @unique
-  role           Role      @default(user)
-  verified       Boolean   @default(false)
-  provider       String    @default("local")
-  photo          String
-  createdAt      DateTime
-  updatedAt      DateTime  @updatedAt
-  Project        Project[]
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  role      Role      @default(user)
+  verified  Boolean   @default(false)
+  provider  String    @default("local")
+  photo     String
+  createdAt DateTime
+  updatedAt DateTime  @updatedAt
+  Project   Project[]
 
   @@map(name: "users")
 }
@@ -35,28 +35,31 @@ model Project {
   displayName String
   framework   String
   userId      String
+  slug        String
   createdAt   DateTime     @default(now())
   User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   Deployment  Deployment[]
+  Domain      Domain[]
 
   @@unique([repository, userId])
 }
 
 model Deployment {
-  id        String   @id @default(cuid())
-  commit    String?
-  primary   Boolean
-  branch    String
-  Project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
-  Domain    Domain[]
+  id            String   @id @default(cuid())
+  commit        String?
+  primary       Boolean
+  branch        String
+  defaultDomain String?
+  Project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId     String
+  createdAt     DateTime @default(now())
 }
 
 model Domain {
-  name         String     @id
-  deploymentId String
-  default      Boolean    @default(true)
-  Deployment   Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  name      String  @id
+  default   Boolean @default(true)
+  Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 }
 
 enum Role {

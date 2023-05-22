@@ -10,6 +10,11 @@ import {
   changeDeploymentState,
   createDeployment,
 } from "../../lib/github/deployment.js";
+import deleteIngress from "../../lib/k8s/deleteIngress.js";
+import createIngress from "../../lib/k8s/createIngress.js";
+import { customAlphabet } from "nanoid";
+
+const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvw", 10);
 
 export const webhookHandler: Handler = async (req, res) => {
   switch (req.headers["x-github-event"]) {
@@ -21,6 +26,9 @@ export const webhookHandler: Handler = async (req, res) => {
       const project = await prisma.project.findFirst({
         where: {
           repository: repository.full_name,
+        },
+        include: {
+          Domain: true,
         },
       });
 
@@ -37,8 +45,9 @@ export const webhookHandler: Handler = async (req, res) => {
 
       const framework = frameworks[project?.framework as FrameworkTypes];
 
-      const subdomain =
-        `${repository.owner.name}-${head_commit.id}-${branch}`.toLowerCase();
+      const subdomain = `${project.slug}-${nanoid(7)}-${branch}`.toLowerCase();
+
+      const commitDomain = subdomain + "." + process.env.DOMAIN;
 
       const image = await framework.builder({
         git: globalConfig.git.githubBaseUrl + "/" + repository.full_name,
@@ -49,10 +58,13 @@ export const webhookHandler: Handler = async (req, res) => {
       if (!image)
         return res.status(500).send("Image url could not be retrieved");
 
-      const deployment = await deploy(subdomain, {
-        userId: project.userId,
-        projectId: project.id,
-        image: image,
+      const lastDeployment = await prisma.deployment.findFirst({
+        where: {
+          branch: branch,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
 
       const dbDeployment = await prisma.deployment.create({
@@ -60,11 +72,6 @@ export const webhookHandler: Handler = async (req, res) => {
           branch: branch,
           primary: false,
           commit: head_commit.id,
-          Domain: {
-            create: {
-              name: `${subdomain}.${process.env.DOMAIN}`,
-            },
-          },
           Project: {
             connect: {
               id: project.id,
@@ -73,16 +80,43 @@ export const webhookHandler: Handler = async (req, res) => {
         },
       });
 
+      //delete old ingress for project domains
+      if (lastDeployment)
+        await deleteIngress(lastDeployment?.id, project.userId, true);
+
+      //Set project domains to current deployment
+      await createIngress({
+        domains: project.Domain.map((d) => d.name),
+        name: dbDeployment.id,
+        ns: project.userId,
+        main: true,
+      });
+
+      const deploymentName = dbDeployment.id;
+
+      //Create commit specific domain
+      await createIngress({
+        domains: [commitDomain],
+        name: deploymentName,
+        ns: project.userId,
+        main: false,
+      });
+
+      const deployment = await deploy(deploymentName, {
+        namespace: project.userId,
+        image: image,
+      });
+
       if (githubDeployment.data)
         await changeDeploymentState(req.body.installation.id, {
           //@ts-ignore
           deploymentId: githubDeployment.data.id,
           owner: repository.owner.name,
           repo: repository.name,
-          logUrl: "https://" + subdomain + "." + process.env.DOMAIN,
+          logUrl: "https://" + commitDomain,
           state: "success",
         });
-
+      res.send("deployed");
       break;
     case "installation":
       res.send("installation updated");

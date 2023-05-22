@@ -10,19 +10,15 @@ export default async function deploy(
   name: string,
   config: {
     image: string;
-    userId: string;
-    projectId: string;
+    namespace: string;
     appPort?: number;
   }
 ) {
-  const domain = process.env.DOMAIN;
-  const appDomain = `${name}.${domain}`;
-
   const SECRET_NAME = "registry-creds";
 
   const namespaceSpec = {
     metadata: {
-      name: config.userId,
+      name: config.namespace,
     },
   };
 
@@ -71,36 +67,6 @@ export default async function deploy(
     },
   };
 
-  const ingressSpec: V1Ingress = {
-    metadata: {
-      name: `${name}-${globalConfig.k8s.ingressSuffix}`,
-    },
-    spec: {
-      ingressClassName: "nginx",
-      rules: [
-        {
-          host: appDomain,
-          http: {
-            paths: [
-              {
-                backend: {
-                  service: {
-                    name: `${name}-${globalConfig.k8s.svcSuffix}`,
-                    port: {
-                      number: 80,
-                    },
-                  },
-                },
-                path: "/",
-                pathType: "Prefix",
-              },
-            ],
-          },
-        },
-      ],
-    },
-  };
-
   const serviceSpec = {
     metadata: {
       name: `${name}-${globalConfig.k8s.svcSuffix}`,
@@ -130,15 +96,8 @@ export default async function deploy(
     serviceSpec
   );
 
-  const ingress = await networking.createNamespacedIngress(
-    namespaceSpec.metadata.name,
-    ingressSpec
-  );
-
   return {
     deployment,
-    ingress,
     service,
-    domain: appDomain,
   };
 }
