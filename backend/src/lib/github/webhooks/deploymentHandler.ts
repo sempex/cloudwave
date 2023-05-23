@@ -61,6 +61,7 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
     data: {
       branch: branch,
       primary: false,
+      defaultDomain: commitDomain,
       Project: {
         connect: {
           id: project.id,
