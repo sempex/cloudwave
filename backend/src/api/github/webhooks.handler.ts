@@ -3,6 +3,7 @@ import { Handler } from "express";
 import { PushEvent } from "@octokit/webhooks-types";
 import pushHandler from "../../lib/github/webhooks/pushHandler.js";
 import { createdDeploymentHandler } from "../../lib/github/webhooks/deploymentHandler.js";
+import { installationHandler } from "../../lib/github/webhooks/installationHandler.js";
 
 export const webhookHandler: Handler = async (req, res) => {
   switch (req.headers["x-github-event"]) {
@@ -16,6 +17,7 @@ export const webhookHandler: Handler = async (req, res) => {
         ? res.send("deployed to cluster")
         : res.status(500).send("No deployment startet on cluster");
     case "installation":
+      await installationHandler(req.body);
       res.send("installation updated");
       break;
     default:

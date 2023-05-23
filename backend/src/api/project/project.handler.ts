@@ -1,16 +1,13 @@
 import { Handler } from "express";
-import deploy from "../../lib/k8s/deploy.js";
 import { z } from "zod";
 import statusRes from "../../lib/stautsRes.js";
 import {
-  FrameworkTypes,
   buildParameterValidators,
-  frameworks,
 } from "../../lib/ci/pipelines/frameworks.js";
 import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
-import { globalConfig } from "../../lib/config.js";
-import createIngress from "../../lib/k8s/createIngress.js";
+import { createDeployment } from "../../lib/github/deployment.js";
+import { getInstallation } from "../../lib/github/index.js";
 
 const schemaBase = z.object({
   repositoryName: z.string(),
@@ -35,10 +32,6 @@ const post: Handler = async (req, res) => {
     } = await schema.parseAsync({
       ...req.body,
     });
-
-    const gitUrl = globalConfig.git.githubBaseUrl + "/" + repositoryName;
-
-    const framework = frameworks[type as FrameworkTypes];
 
     const subDomain = await uniqueDomain(slug || name);
 
@@ -70,33 +63,36 @@ const post: Handler = async (req, res) => {
       },
       include: {
         Deployment: true,
+        User: true,
+        Domain: true,
       },
     });
 
-    const image = await framework.builder({
-      git: gitUrl,
-      name: subDomain.slug,
-      branch,
-      buildParameters,
-    });
+    if (!project.User.installationId)
+      return res.status(400).send(statusRes("error", "No installation found"));
 
-    if (!image) return res.status(500).send("Image url could not be retrieved");
+    const octokit = await getInstallation(Number(project.User.installationId));
 
-    const deployment = await deploy(project.Deployment[0].id, {
-      namespace: res.locals.user.id,
-      image: image,
-      appPort: appPort,
-    });
+    const installation = await octokit.apps.getAuthenticated();
 
-    const ingress = await createIngress({
-      ns: res.locals.user.id,
-      domains: [domain],
-      main: true,
-      name: project.Deployment[0].id,
-    });
+    const repo = project.repository.split("/").at(-1);
 
-    res.send({
-      url: "https://" + ingress.domains[0],
+    if (!installation.data.owner || !repo)
+      return res
+        .status(500)
+        .send(
+          statusRes("error", "Unable to retrieve github app installation name")
+        );
+
+    await createDeployment(
+      Number(project.User.installationId),
+      repo,
+      installation.data.owner.login,
+      branch
+    );
+
+    return res.send({
+      project,
     });
   } catch (err: any) {
     res.status(400).send(statusRes("error", err));

@@ -51,14 +51,12 @@ export const githubOauthHandler = async (req: Request, res: Response) => {
       access_token,
     });
 
-    console.log(id);
-
     const user = await prisma.user.upsert({
       where: { email },
       create: {
         createdAt: new Date(),
-        name: login,
         githubId: String(id),
+        name: login,
         email,
         photo: avatar_url,
         verified: true,

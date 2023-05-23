@@ -15,17 +15,18 @@ model Session {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  githubId  String?
-  name      String
-  email     String    @unique
-  role      Role      @default(user)
-  verified  Boolean   @default(false)
-  provider  String    @default("local")
-  photo     String
-  createdAt DateTime
-  updatedAt DateTime  @updatedAt
-  Project   Project[]
+  id             String    @id @default(cuid())
+  installationId String?   @unique
+  githubId       String    @unique
+  name           String
+  email          String    @unique
+  role           Role      @default(user)
+  verified       Boolean   @default(false)
+  provider       String    @default("local")
+  photo          String
+  createdAt      DateTime
+  updatedAt      DateTime  @updatedAt
+  Project        Project[]
 
   @@map(name: "users")
 }

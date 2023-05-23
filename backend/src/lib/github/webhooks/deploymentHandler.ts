@@ -18,7 +18,14 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   const project = await prisma.project.findFirst({
     where: {
-      AND: [{ repository: repository.full_name }],
+      AND: [
+        {
+          repository: repository.full_name,
+          User: {
+            installationId: String(installation?.id),
+          },
+        },
+      ],
     },
     include: {
       Domain: true,
