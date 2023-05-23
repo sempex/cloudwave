@@ -11,15 +11,18 @@ export const webhookHandler: Handler = async (req, res) => {
       const success = await pushHandler(req.body as PushEvent);
       if (!success) res.status(500).send("error while creating deployment");
       return res.send("deployed");
+      
     case "deployment":
       if (req.body.action !== "created") return res.send("Not create event");
       return (await createdDeploymentHandler(req.body))
         ? res.send("deployed to cluster")
         : res.status(500).send("No deployment startet on cluster");
+
     case "installation":
       await installationHandler(req.body);
       res.send("installation updated");
       break;
+
     default:
       console.log("unhandled event", req.headers["x-github-event"]);
       res.send("ok");

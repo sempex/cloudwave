@@ -27,9 +27,6 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
         },
       ],
     },
-    include: {
-      Domain: true,
-    },
   });
 
   if (!project) return false;
@@ -62,12 +59,37 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
       branch: branch,
       primary: false,
       defaultDomain: commitDomain,
-      Project: {
-        connect: {
-          id: project.id,
+      environment: {
+        connectOrCreate: {
+          where: {
+            branch: branch,
+          },
+          create: {
+            branch: branch,
+            production: false,
+            project: {
+              connect: {
+                id: project.id,
+              },
+            },
+          },
         },
       },
     },
+    include: {
+      environment: {
+        include: {
+          domain: true,
+        },
+      },
+    },
+  });
+
+  const deploymentName = dbDeployment.id;
+
+  await deploy(deploymentName, {
+    namespace: project.userId,
+    image: image,
   });
 
   //delete old ingress for project domains
@@ -76,13 +98,11 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   //Set project domains to current deployment
   await createIngress({
-    domains: project.Domain.map((d) => d.name),
+    domains: dbDeployment.environment.domain.map((d) => d.name),
     name: dbDeployment.id,
     ns: project.userId,
     main: true,
   });
-
-  const deploymentName = dbDeployment.id;
 
   //Create commit specific domain
   await createIngress({
@@ -90,11 +110,6 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
     name: deploymentName,
     ns: project.userId,
     main: false,
-  });
-
-  await deploy(deploymentName, {
-    namespace: project.userId,
-    image: image,
   });
 
   await changeDeploymentState(installation?.id || 0, {

@@ -40,29 +40,37 @@ model Project {
   slug           String
   createdAt      DateTime         @default(now())
   User           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Deployment     Deployment[]
-  Domain         Domain[]
   BuildParameter BuildParameter[]
+  environment    Environment[]
 
   @@unique([repository, userId])
 }
 
 model Deployment {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   commit        String?
   primary       Boolean
   branch        String
   defaultDomain String?
-  Project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId     String
-  createdAt     DateTime @default(now())
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId String
+  createdAt     DateTime    @default(now())
 }
 
 model Domain {
-  name      String  @id
-  default   Boolean @default(true)
-  Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
+  name          String      @id
+  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId String
+}
+
+model Environment {
+  id         String       @id @default(cuid())
+  project    Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId  String
+  branch     String       @unique
+  production Boolean
+  deployment Deployment[]
+  domain     Domain[]
 }
 
 model BuildParameter {

@@ -17,9 +17,6 @@ export default async function pushHandler(event: PushEvent) {
         { repository: repository.full_name },
       ],
     },
-    include: {
-      Domain: true,
-    },
   });
 
   if (!project || !installation) return;

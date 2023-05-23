@@ -1,9 +1,7 @@
 import { Handler } from "express";
 import { z } from "zod";
 import statusRes from "../../lib/stautsRes.js";
-import {
-  buildParameterValidators,
-} from "../../lib/ci/pipelines/frameworks.js";
+import { buildParameterValidators } from "../../lib/ci/pipelines/frameworks.js";
 import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 import { createDeployment } from "../../lib/github/deployment.js";
@@ -43,16 +41,15 @@ const post: Handler = async (req, res) => {
         displayName: name,
         slug: subDomain.slug,
         repository: repositoryName,
-        Deployment: {
+        environment: {
           create: {
             branch: branch,
-            primary: true,
-          },
-        },
-        Domain: {
-          create: {
-            name: domain,
-            default: true,
+            production: true,
+            domain: {
+              create: {
+                name: domain,
+              },
+            },
           },
         },
         User: {
@@ -62,9 +59,7 @@ const post: Handler = async (req, res) => {
         },
       },
       include: {
-        Deployment: true,
         User: true,
-        Domain: true,
       },
     });
 
