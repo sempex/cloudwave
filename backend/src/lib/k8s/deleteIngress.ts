@@ -4,11 +4,11 @@ import { networking } from "./k8s.js";
 export default async function deleteIngress(
   name: string,
   ns: string,
-  main: boolean
+  environment: string
 ) {
   try {
     await networking.deleteNamespacedIngress(
-      `${main ? "custom-domain-" : ""}${name}-${
+      `${environment ? environment + "-" : ""}${name}-${
         globalConfig.k8s.ingressSuffix
       }`,
       ns

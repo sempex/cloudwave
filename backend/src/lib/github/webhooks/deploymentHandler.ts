@@ -1,4 +1,8 @@
-import { DeploymentCreatedEvent, PushEvent } from "@octokit/webhooks-types";
+import {
+  DeploymentCreatedEvent,
+  DeploymentStatusEvent,
+  PushEvent,
+} from "@octokit/webhooks-types";
 import { changeDeploymentState } from "../deployment.js";
 import { FrameworkTypes, frameworks } from "../../ci/pipelines/frameworks.js";
 import { prisma } from "../../db/prisma.js";
@@ -8,6 +12,7 @@ import deploy from "../../k8s/deploy.js";
 import { globalConfig } from "../../config.js";
 import createIngress from "../../k8s/createIngress.js";
 import deleteIngress from "../../k8s/deleteIngress.js";
+import { Prisma } from "@prisma/client";
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvw", 10);
 
@@ -37,14 +42,6 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   const commitDomain = subdomain + "." + process.env.DOMAIN;
 
-  const image = await framework.builder({
-    git: globalConfig.git.githubBaseUrl + "/" + repository.full_name,
-    name: subdomain,
-    branch,
-  });
-
-  if (!image) return false;
-
   const lastDeployment = await prisma.deployment.findFirst({
     where: {
       branch: branch,
@@ -58,7 +55,9 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
     data: {
       branch: branch,
       primary: false,
+      githubDeploymentId: deployment.id,
       defaultDomain: commitDomain,
+      state: "in_progress",
       environment: {
         connectOrCreate: {
           where: {
@@ -87,6 +86,14 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   const deploymentName = dbDeployment.id;
 
+  const image = await framework.builder({
+    git: globalConfig.git.githubBaseUrl + "/" + repository.full_name,
+    name: subdomain,
+    branch,
+  });
+
+  if (!image) return false;
+
   await deploy(deploymentName, {
     namespace: project.userId,
     image: image,
@@ -94,14 +101,18 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   //delete old ingress for project domains
   if (lastDeployment)
-    await deleteIngress(lastDeployment?.id, project.userId, true);
+    await deleteIngress(
+      lastDeployment?.id,
+      project.userId,
+      dbDeployment.environment.branch
+    );
 
   //Set project domains to current deployment
   await createIngress({
     domains: dbDeployment.environment.domain.map((d) => d.name),
     name: dbDeployment.id,
     ns: project.userId,
-    main: true,
+    environment: dbDeployment.environment.branch,
   });
 
   //Create commit specific domain
@@ -109,7 +120,6 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
     domains: [commitDomain],
     name: deploymentName,
     ns: project.userId,
-    main: false,
   });
 
   await changeDeploymentState(installation?.id || 0, {
@@ -123,3 +133,23 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   return true;
 }
+
+export const deploymentStateHandler = async (event: DeploymentStatusEvent) => {
+  try {
+    const { deployment_status, deployment } = event;
+    const state = deployment_status.state;
+
+    const dbDeployment = await prisma.deployment.update({
+      where: {
+        githubDeploymentId: deployment.id,
+      },
+      data: {
+        state: state as Prisma.EnumStateFieldUpdateOperationsInput,
+      },
+    });
+
+    return dbDeployment;
+  } catch {
+    return false;
+  }
+};

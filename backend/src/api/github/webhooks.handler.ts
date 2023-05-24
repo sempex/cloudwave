@@ -2,7 +2,10 @@ import { Handler } from "express";
 
 import { PushEvent } from "@octokit/webhooks-types";
 import pushHandler from "../../lib/github/webhooks/pushHandler.js";
-import { createdDeploymentHandler } from "../../lib/github/webhooks/deploymentHandler.js";
+import {
+  createdDeploymentHandler,
+  deploymentStateHandler,
+} from "../../lib/github/webhooks/deploymentHandler.js";
 import { installationHandler } from "../../lib/github/webhooks/installationHandler.js";
 
 export const webhookHandler: Handler = async (req, res) => {
@@ -27,6 +30,16 @@ export const webhookHandler: Handler = async (req, res) => {
         return res.send("Deployed to cluster");
       } else {
         return res.status(500).send("No deployment started on cluster");
+      }
+    }
+
+    case "deployment_status": {
+      const stateSuccess = await deploymentStateHandler(req.body);
+
+      if (stateSuccess) {
+        return res.send("Updated state in DB");
+      } else {
+        return res.status(500).send("Failed to change state in DB");
       }
     }
 

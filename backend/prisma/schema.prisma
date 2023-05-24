@@ -47,14 +47,16 @@ model Project {
 }
 
 model Deployment {
-  id            String      @id @default(cuid())
-  commit        String?
-  primary       Boolean
-  branch        String
-  defaultDomain String?
-  environment   Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
-  environmentId String
-  createdAt     DateTime    @default(now())
+  id                 String      @id @default(cuid())
+  commit             String?
+  primary            Boolean
+  branch             String
+  defaultDomain      String?
+  environment        Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  environmentId      String
+  createdAt          DateTime    @default(now())
+  state              State       @default(pending)
+  githubDeploymentId Int         @unique
 }
 
 model Domain {
@@ -85,4 +87,13 @@ model BuildParameter {
 enum Role {
   user
   admin
+}
+
+enum State {
+  pending
+  success
+  failure
+  in_progress
+  queued
+  error
 }

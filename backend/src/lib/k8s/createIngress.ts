@@ -3,23 +3,23 @@ import { globalConfig } from "../config.js";
 import { networking } from "./k8s.js";
 /**
  *
- * @param param0 main - If ingress has the domains set in the project and not only commit domain
+ * @param param0 environment - Domains will be assigned to a specific environment and can be updated by the user. 
  * @returns
  */
 export default async function createIngress({
   domains,
   name,
-  main,
+  environment,
   ns,
 }: {
   name: string;
   domains: string[];
-  main?: boolean;
+  environment?: string;
   ns: string;
 }) {
   const ingressSpec: V1Ingress = {
     metadata: {
-      name: `${main ? "custom-domain-" : ""}${name}-${
+      name: `${environment ? environment + "-" : ""}${name}-${
         globalConfig.k8s.ingressSuffix
       }`,
     },
