@@ -6,25 +6,38 @@ import { createdDeploymentHandler } from "../../lib/github/webhooks/deploymentHa
 import { installationHandler } from "../../lib/github/webhooks/installationHandler.js";
 
 export const webhookHandler: Handler = async (req, res) => {
-  switch (req.headers["x-github-event"]) {
-    case "push":
-      const success = await pushHandler(req.body as PushEvent);
-      if (!success) res.status(500).send("error while creating deployment");
-      return res.send("deployed");
-      
-    case "deployment":
-      if (req.body.action !== "created") return res.send("Not create event");
-      return (await createdDeploymentHandler(req.body))
-        ? res.send("deployed to cluster")
-        : res.status(500).send("No deployment startet on cluster");
+  const event = req.headers["x-github-event"];
 
-    case "installation":
+  switch (event) {
+    case "push": {
+      const success = await pushHandler(req.body);
+      if (!success) {
+        return res.status(500).send("Error while creating deployment");
+      }
+      return res.send("Deployed");
+    }
+
+    case "deployment": {
+      if (req.body.action !== "created") {
+        return res.send("Not a create event");
+      }
+
+      const deploymentStarted = await createdDeploymentHandler(req.body);
+      if (deploymentStarted) {
+        return res.send("Deployed to cluster");
+      } else {
+        return res.status(500).send("No deployment started on cluster");
+      }
+    }
+
+    case "installation": {
       await installationHandler(req.body);
-      res.send("installation updated");
-      break;
+      return res.send("Installation updated");
+    }
 
-    default:
-      console.log("unhandled event", req.headers["x-github-event"]);
-      res.send("ok");
+    default: {
+      console.log("Unhandled event:", event);
+      return res.send("OK");
+    }
   }
 };
