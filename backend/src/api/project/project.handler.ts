@@ -6,6 +6,7 @@ import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 import { createDeployment } from "../../lib/github/deployment.js";
 import { getInstallation } from "../../lib/github/index.js";
+import { getBranches } from "../../lib/github/webhooks/getBranches.js";
 
 const schemaBase = z.object({
   repositoryName: z.string(),
@@ -35,23 +36,31 @@ const post: Handler = async (req, res) => {
 
     const domain = `${subDomain.slug}.${process.env.DOMAIN}`;
 
+    const user = await prisma.user.findUnique({
+      where: {
+        id: res.locals.user.id,
+      },
+    });
+
+    if (!user?.installationId)
+      return res
+        .status(500)
+        .send(statusRes("error", "Missing installation ID"));
+
+    const [owner, repo] = repositoryName.split("/");
+
+    const branches = await getBranches(
+      repo,
+      owner,
+      Number(user?.installationId)
+    );
+
     const project = await prisma.project.create({
       data: {
         framework: type,
         displayName: name,
         slug: subDomain.slug,
         repository: repositoryName,
-        environment: {
-          create: {
-            branch: branch,
-            production: true,
-            domain: {
-              create: {
-                name: domain,
-              },
-            },
-          },
-        },
         User: {
           connect: {
             id: res.locals.user.id,
@@ -70,8 +79,6 @@ const post: Handler = async (req, res) => {
 
     const installation = await octokit.apps.getAuthenticated();
 
-    const repo = project.repository.split("/").at(-1);
-
     if (!installation.data.owner || !repo)
       return res
         .status(500)
@@ -79,12 +86,41 @@ const post: Handler = async (req, res) => {
           statusRes("error", "Unable to retrieve github app installation name")
         );
 
-    await createDeployment(
-      Number(project.User.installationId),
-      repo,
-      installation.data.owner.login,
-      branch
-    );
+    //create env for each branch
+    for (const branch of branches) {
+      const envName = await uniqueDomain(
+        (slug || name) + "-git-" + branch.name
+      );
+
+      const envDomain = `${envName.slug}.${process.env.DOMAIN}`;
+
+      const env = await prisma.environment.create({
+        data: {
+          branch: branch.name,
+          production: branch.main,
+
+          domain: {
+            create: {
+              name: branch.main ? domain : envDomain,
+              default: true,
+            },
+          },
+          project: {
+            connect: {
+              id: project.id,
+            },
+          },
+        },
+      });
+
+      await createDeployment(
+        Number(project.User.installationId),
+        repo,
+        installation.data.owner.login,
+        branch.name,
+        env.production
+      );
+    }
 
     return res.send({
       project,

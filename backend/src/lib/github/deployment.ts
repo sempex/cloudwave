@@ -19,7 +19,8 @@ export const createDeployment = async (
   installationId: number,
   repo: string,
   owner: string,
-  ref: string
+  ref: string,
+  production?: boolean
 ) => {
   const octokit = await getInstallation(installationId);
 
@@ -27,6 +28,7 @@ export const createDeployment = async (
     owner: owner,
     ref: ref,
     repo: repo,
+    environment: production ? "Production" : "Preview",
   });
 };
 

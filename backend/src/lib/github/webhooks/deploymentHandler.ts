@@ -38,13 +38,15 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   const framework = frameworks[project?.framework as FrameworkTypes];
 
-  const subdomain = `${project.slug}-${nanoid(7)}-${branch}`.toLowerCase();
+  const subdomain = `${project.slug}-${nanoid(7)}-git`.toLowerCase();
 
   const commitDomain = subdomain + "." + process.env.DOMAIN;
 
   const lastDeployment = await prisma.deployment.findFirst({
     where: {
-      branch: branch,
+      environment: {
+        branch: branch,
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -53,7 +55,6 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   const dbDeployment = await prisma.deployment.create({
     data: {
-      branch: branch,
       primary: false,
       githubDeploymentId: deployment.id,
       defaultDomain: commitDomain,
