@@ -9,6 +9,7 @@ import connectDB from "./lib/db/prisma.js";
 import cors from "cors";
 import userRouter from "./api/user/user.router.js";
 import githubRouter from "./api/github/github.router.js";
+import domainRouter from "./api/project/domains/domain.route.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use(
 );
 
 app.use("/project", deployRouter);
+app.use("/project/:id/domain", domainRouter);
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/github", githubRouter);
