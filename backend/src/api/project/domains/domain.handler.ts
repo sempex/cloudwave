@@ -22,6 +22,9 @@ export const addDomainHandler: Handler = async (req, res) => {
     const { domain, envId } = await addSchema.parseAsync(req.body);
     const { id } = await paramsSchema.parseAsync(req.params);
 
+    if (domain.endsWith(process.env.DOMAIN))
+      throw new Error("Official subdomain not allowed as custom domain");
+
     const project = await prisma.project.update({
       where: {
         id_userId: {
