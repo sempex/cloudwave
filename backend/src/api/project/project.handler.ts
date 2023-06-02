@@ -61,6 +61,7 @@ const post: Handler = async (req, res) => {
         displayName: name,
         slug: subDomain.slug,
         repository: repositoryName,
+        port: appPort,
         User: {
           connect: {
             id: res.locals.user.id,

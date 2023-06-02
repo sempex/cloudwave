@@ -97,6 +97,7 @@ export async function createdDeploymentHandler(event: DeploymentCreatedEvent) {
 
   await deploy(deploymentName, {
     namespace: project.userId,
+    appPort: project.port,
     image: image,
   });
 
