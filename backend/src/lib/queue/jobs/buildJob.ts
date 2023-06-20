@@ -29,7 +29,10 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     },
   });
 
-  if (!project) return false;
+  if (!project) {
+    console.error("Invalid project");
+    return false;
+  }
 
   const framework = frameworks[project?.framework as FrameworkTypes];
 
@@ -88,7 +91,10 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     branch,
   });
 
-  if (!image) return false;
+  if (!image) {
+    console.error("No image");
+    return false;
+  }
 
   await deploy(deploymentName, {
     namespace: project.userId,
