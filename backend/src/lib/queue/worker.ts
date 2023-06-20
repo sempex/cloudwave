@@ -18,7 +18,7 @@ export function initWorker(): void {
     });
 
     worker.on("active", (job: Job<unknown>) => {
-      console.debug(`Completed: ${job.id}`);
+      console.debug(`Active: ${job.id}`);
     });
     worker.on("error", (failedReason: Error) => {
       console.error(`Build Error:`, failedReason);
