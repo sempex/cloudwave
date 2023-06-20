@@ -10,6 +10,8 @@ import cors from "cors";
 import userRouter from "./api/user/user.router.js";
 import githubRouter from "./api/github/github.router.js";
 import domainRouter from "./api/project/domains/domain.route.js";
+import { queue } from "./lib/queue/index.js";
+import { initWorker } from "./lib/queue/worker.js";
 
 dotenv.config();
 
@@ -38,7 +40,8 @@ app.get("/", (req, res) => {
   res.send("shiper.app API");
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`✅ Server is running at http://localhost:${port}`);
   connectDB();
+  initWorker();
 });

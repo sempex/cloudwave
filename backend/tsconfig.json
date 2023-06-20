@@ -1,16 +1,19 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    "display": "Node 16",
-    "compilerOptions": {
-      "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-      "module": "esnext",                                  /* Specify what module code is generated. */                              /* Specify the root folder within your source files. */
-      "moduleResolution": "nodenext",                      /* Specify how TypeScript looks up a file from a given module specifier. */           /* Allow 'import x from y' when a module doesn't have a default export. */
-      "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */                      /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */
-      "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
-      "strict": true,                                      /* Enable all strict type-checking options. */                 /* Skip type checking .d.ts files that are included with TypeScript. */
-      "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
-      "outDir": "dist/"
-    },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts"]
-  }
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 16",
+  "compilerOptions": {
+    "target": "es2016" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "module": "esnext" /* Specify what module code is generated. */ /* Specify the root folder within your source files. */,
+    "moduleResolution": "nodenext" /* Specify how TypeScript looks up a file from a given module specifier. */ /* Allow 'import x from y' when a module doesn't have a default export. */,
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */ /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "strict": true /* Enable all strict type-checking options. */ /* Skip type checking .d.ts files that are included with TypeScript. */,
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "outDir": "dist/"
+  },
+  "paths": {
+    "@lib/*": ["src/lib/*"]
+  },
+  "include": ["src/**/*", "src/lib/queue/.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
