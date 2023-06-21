@@ -23,7 +23,7 @@ export function initWorker(): void {
     worker.on("error", (failedReason: Error) => {
       console.error(`Build Error:`, failedReason);
     });
-    console.log("🛠️  Worker initialized connected successfully");
+    console.log("🛠️  Worker initialized successfully");
   } catch (error) {
     console.log(error);
     process.exit(1);
