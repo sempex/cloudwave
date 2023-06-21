@@ -21,12 +21,16 @@ export default async function pushHandler(event: PushEvent) {
 
   if (!project || !installation) return;
 
-  await createDeployment(
-    installation.id,
-    repository.name,
-    repository.owner.name || "",
-    ref
-  );
-
-  return true;
+  try {
+    await createDeployment(
+      installation.id,
+      repository.name,
+      repository.owner.name || "",
+      ref
+    );
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 }
