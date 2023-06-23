@@ -1,6 +1,11 @@
 import { Octokit } from "@octokit/rest";
 import { createAppAuth } from "@octokit/auth-app";
 
+import { Endpoints } from "@octokit/types";
+
+export type ListBranchesResponse =
+  Endpoints["GET /repos/{owner}/{repo}/branches"]["response"];
+
 export const getInstallation = async (id: number) => {
   const secret = process.env.GITHUB_APP_SECRET.replace(/\\n/g, "\n");
 

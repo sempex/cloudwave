@@ -6,7 +6,8 @@ import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 import { createDeployment } from "../../lib/github/deployment.js";
 import { getInstallation } from "../../lib/github/index.js";
-import { getBranches } from "../../lib/github/webhooks/getBranches.js";
+import { getBranches } from "../../lib/github/getBranches.js";
+import createEnv from "../../lib/createEnv.js";
 
 const schemaBase = z.object({
   repositoryName: z.string(),
@@ -89,29 +90,11 @@ const post: Handler = async (req, res) => {
 
     //create env for each branch
     for (const branch of branches) {
-      const envName = await uniqueDomain(
-        (slug || name) + "-git-" + branch.name
-      );
-
-      const envDomain = `${envName.slug}.${process.env.DOMAIN}`;
-
-      const env = await prisma.environment.create({
-        data: {
-          branch: branch.name,
-          production: branch.main,
-
-          domain: {
-            create: {
-              name: branch.main ? domain : envDomain,
-              default: true,
-            },
-          },
-          project: {
-            connect: {
-              id: project.id,
-            },
-          },
-        },
+      const env = await createEnv({
+        branch,
+        domain: domain,
+        name: slug || name,
+        projectId: project.id,
       });
 
       await createDeployment(

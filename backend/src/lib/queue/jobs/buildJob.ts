@@ -8,13 +8,22 @@ import deleteIngress from "../../k8s/deleteIngress.js";
 
 import { changeDeploymentState } from "../../github/deployment.js";
 import { customAlphabet } from "nanoid";
+import { getInstallation } from "../../github/index.js";
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvw", 10);
 
 export default async function buildJob(event: DeploymentCreatedEvent) {
   const { repository, installation, sender, deployment } = event;
 
-  const branch = deployment.ref.split("/").at(-1) || "master";
+  if (!installation) return;
+
+  const octokit = await getInstallation(installation?.id);
+
+  const { data: branch } = await octokit.repos.getBranch({
+    branch: deployment.ref,
+    repo: repository.name,
+    owner: repository.owner.login,
+  });
 
   const project = await prisma.project.findFirst({
     where: {
@@ -43,7 +52,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   const lastDeployment = await prisma.deployment.findFirst({
     where: {
       environment: {
-        branch: branch,
+        branch: branch.name,
       },
     },
     orderBy: {
@@ -60,10 +69,10 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
       environment: {
         connectOrCreate: {
           where: {
-            branch: branch,
+            branch: branch.name,
           },
           create: {
-            branch: branch,
+            branch: branch.name,
             production: false,
             project: {
               connect: {
@@ -84,11 +93,12 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   });
 
   const deploymentName = dbDeployment.id;
+  const ns = `${project.userId}-${project.id}`;
 
   const image = await framework.builder({
     git: globalConfig.git.githubBaseUrl + "/" + repository.full_name,
     name: subdomain,
-    branch,
+    branch: branch.name,
   });
 
   if (!image) {
@@ -97,7 +107,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   }
 
   await deploy(deploymentName, {
-    namespace: project.userId,
+    namespace: ns,
     appPort: project.port,
     image: image,
   });
@@ -105,24 +115,23 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   //delete old ingress for project domains
   if (lastDeployment)
     await deleteIngress(
-      lastDeployment?.id,
-      project.userId,
-      dbDeployment.environment.branch
+      deploymentName,
+      ns,
+      dbDeployment.environment.id
     );
-
   //Set project domains to current deployment
   await createIngress({
     domains: dbDeployment.environment.domain.map((d) => d.name),
-    name: dbDeployment.id,
-    ns: project.userId,
-    environment: dbDeployment.environment.branch,
+    name: deploymentName,
+    ns: ns,
+    environment: dbDeployment.environment.id,
   });
 
   //Create commit specific domain
   await createIngress({
     domains: [commitDomain],
     name: deploymentName,
-    ns: project.userId,
+    ns: ns,
   });
 
   await changeDeploymentState(installation?.id || 0, {
