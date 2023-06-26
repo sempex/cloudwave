@@ -32,18 +32,19 @@ model User {
 }
 
 model Project {
-  id             String           @id @default(cuid())
-  repository     String
-  displayName    String
-  framework      String
-  userId         String
-  slug           String
-  createdAt      DateTime         @default(now())
-  User           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  BuildParameter BuildParameter[]
-  environment    Environment[]
-  port           Int              @default(3000)
-  basePath       String?
+  id              String           @id @default(cuid())
+  repository      String
+  displayName     String
+  framework       String
+  userId          String
+  slug            String
+  createdAt       DateTime         @default(now())
+  User            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  BuildParameter  BuildParameter[]
+  environment     Environment[]
+  port            Int              @default(3000)
+  basePath        String?
+  keepDeployments Boolean          @default(false)
 
   @@unique([repository, userId])
   @@unique([id, userId])

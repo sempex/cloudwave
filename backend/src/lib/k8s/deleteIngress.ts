@@ -4,7 +4,7 @@ import { networking } from "./k8s.js";
 export default async function deleteIngress(
   name: string,
   ns: string,
-  environment: string
+  environment?: string
 ) {
   try {
     await networking.deleteNamespacedIngress(

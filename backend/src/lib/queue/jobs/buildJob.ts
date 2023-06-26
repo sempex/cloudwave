@@ -9,6 +9,7 @@ import deleteIngress from "../../k8s/deleteIngress.js";
 import { changeDeploymentState } from "../../github/deployment.js";
 import { customAlphabet } from "nanoid";
 import { getInstallation } from "../../github/index.js";
+import deleteDeployment from "../../k8s/deleteDeployment.js";
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvw", 10);
 
@@ -112,13 +113,22 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     image: image,
   });
 
+  if (!project.keepDeployments && lastDeployment) {
+    await deleteDeployment(lastDeployment.id, ns);
+
+    await changeDeploymentState(installation?.id || 0, {
+      //@ts-ignore
+      deploymentId: lastDeployment.githubDeploymentId,
+      owner: repository.owner.login,
+      repo: repository.name,
+      state: "inactive",
+    });
+  }
+
   //delete old ingress for project domains
   if (lastDeployment)
-    await deleteIngress(
-      deploymentName,
-      ns,
-      dbDeployment.environment.id
-    );
+    await deleteIngress(lastDeployment.id, ns, dbDeployment.environment.id);
+
   //Set project domains to current deployment
   await createIngress({
     domains: dbDeployment.environment.domain.map((d) => d.name),
