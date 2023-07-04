@@ -19,7 +19,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   if (!installation) {
     console.error("Invalid installation");
     return false;
-  };
+  }
 
   const octokit = await getInstallation(installation?.id);
 
@@ -73,7 +73,10 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
       environment: {
         connectOrCreate: {
           where: {
-            branch: branch.name,
+            projectId_branch: {
+              projectId: project.id,
+              branch: branch.name,
+            },
           },
           create: {
             branch: branch.name,
