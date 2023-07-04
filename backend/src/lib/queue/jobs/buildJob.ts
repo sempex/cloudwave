@@ -57,6 +57,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     where: {
       environment: {
         branch: branch.name,
+        projectId: project.id,
       },
     },
     orderBy: {

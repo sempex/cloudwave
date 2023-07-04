@@ -1,6 +1,7 @@
 import { ZodTypeAny, z } from "zod";
 import { nodeFramework } from "./node.js";
 import { staticFramework } from "./static.js";
+import { nextjsFramework } from "./nextjs.js";
 
 export interface Framework<CustomBuildProps> {
   displayName: string;
@@ -25,6 +26,7 @@ interface BuildPropOptions {
 export const frameworks = {
   node: nodeFramework,
   static: staticFramework,
+  nextjs: nextjsFramework,
 } as const;
 
 export const buildParameterValidators = z.discriminatedUnion("type", [
@@ -35,6 +37,10 @@ export const buildParameterValidators = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("static"),
     buildParameters: frameworks["static"].buildOptionsValidator,
+  }),
+  z.object({
+    type: z.literal("nextjs"),
+    buildParameters: frameworks["nextjs"].buildOptionsValidator,
   }),
 ]);
 
