@@ -34,6 +34,7 @@ type NodeBuildProps = z.infer<typeof buildOptionsValidator>;
 
 export const nextjsFramework: Framework<NodeBuildProps> = {
   builder: nodeBuilder,
+  icon: "https://static-00.iconduck.com/assets.00/next-js-icon-512x512-zuauazrk.png",
   displayName: "Basic Next app",
   buildOptionsValidator,
   buildOptions: [],

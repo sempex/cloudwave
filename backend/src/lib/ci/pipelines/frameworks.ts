@@ -5,6 +5,7 @@ import { nextjsFramework } from "./nextjs.js";
 
 export interface Framework<CustomBuildProps> {
   displayName: string;
+  icon: string;
   builder: (props: BuildProps<CustomBuildProps>) => Promise<null | string>;
   buildOptions: BuildPropOptions[];
   buildOptionsValidator: ZodTypeAny;

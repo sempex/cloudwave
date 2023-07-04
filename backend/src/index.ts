@@ -12,6 +12,7 @@ import githubRouter from "./api/github/github.router.js";
 import domainRouter from "./api/project/domains/domain.route.js";
 import { queue } from "./lib/queue/index.js";
 import { initWorker } from "./lib/queue/worker.js";
+import frameworkRouter from "./api/frameworks/frameworks.router.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/project/:id/domain", domainRouter);
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/github", githubRouter);
+app.use("/frameworks", frameworkRouter);
 
 app.get("/", (req, res) => {
   res.send("shiper.app API");

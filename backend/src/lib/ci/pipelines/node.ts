@@ -14,6 +14,7 @@ type NodeBuildProps = z.infer<typeof buildOptionsValidator>;
 export const nodeFramework: Framework<NodeBuildProps> = {
   builder: nodeBuilder,
   displayName: "Basic Node app",
+  icon: "https://static-00.iconduck.com/assets.00/node-js-icon-454x512-nztofx17.png",
   buildOptionsValidator,
   buildOptions: [
     {

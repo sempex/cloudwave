@@ -8,6 +8,7 @@ type StaticBuildProps = z.infer<typeof buildOptionsValidator>;
 
 export const staticFramework: Framework<StaticBuildProps> = {
   builder: staticBuilder,
+  icon: "https://cdn.pixabay.com/photo/2017/08/05/11/16/logo-2582748_1280.png",
   displayName: "Static Website",
   buildOptionsValidator,
   buildOptions: [],
@@ -46,7 +47,6 @@ async function staticBuilder({
         )
         .publish(`${process.env.REGISTRY_URL}/shiper-${name}`);
       image = imgRef;
-      
     },
     { LogOutput: process.stdout }
   );
