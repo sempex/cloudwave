@@ -16,7 +16,10 @@ const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvw", 10);
 export default async function buildJob(event: DeploymentCreatedEvent) {
   const { repository, installation, sender, deployment } = event;
 
-  if (!installation) return;
+  if (!installation) {
+    console.error("Invalid installation");
+    return false;
+  };
 
   const octokit = await getInstallation(installation?.id);
 
