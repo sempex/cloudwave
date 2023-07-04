@@ -73,10 +73,11 @@ model Environment {
   id         String       @id @default(cuid())
   project    Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId  String
-  branch     String       @unique
+  branch     String       
   production Boolean
   deployment Deployment[]
   domain     Domain[]
+  @@unique([projectId, branch])
 }
 
 model BuildParameter {
