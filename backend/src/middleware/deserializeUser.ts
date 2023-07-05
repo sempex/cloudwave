@@ -51,6 +51,14 @@ export const deserializeUser = async (
 
     next();
   } catch (err: any) {
+
+    if (err instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({
+        status: "fail",
+        message: "Token expired",
+      });
+    }
+
     next(err);
   }
 };

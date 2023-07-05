@@ -68,20 +68,22 @@ export const addDomainHandler: Handler = async (req, res) => {
 
     const environment = project.environment[0];
     const deployment = environment.deployment[0];
+    const ns = project.userId + "-" + project.id;
 
     try {
       //delete old ingress for project domains
       if (deployment.id)
-        await deleteIngress(deployment.id, project.userId, environment.branch);
+        await deleteIngress(deployment.id, ns, environment.id);
 
       //Set project domains to current deployment
       await createIngress({
         domains: environment.domain.map((d) => d.name),
         name: deployment.id,
-        ns: project.userId,
-        environment: environment.branch,
+        ns: ns,
+        environment: environment.id,
       });
     } catch (e: any) {
+      console.error(e);
       await prisma.domain.delete({
         where: {
           name: domain,
@@ -188,18 +190,19 @@ export const deleteDomainHandler: Handler = async (req, res) => {
 
     const environment = project.environment[0];
     const deployment = environment.deployment[0];
+    const ns = project.userId + "-" + project.id;
 
     try {
       //delete old ingress for project domains
       if (deployment.id)
-        await deleteIngress(deployment.id, project.userId, environment.branch);
+        await deleteIngress(deployment.id, ns, environment.id);
 
       //Set project domains to current deployment
       await createIngress({
         domains: environment.domain.map((d) => d.name),
         name: deployment.id,
-        ns: project.userId,
-        environment: environment.branch,
+        ns: ns,
+        environment: environment.id,
       });
     } catch (e: any) {
       await prisma.domain.delete({
