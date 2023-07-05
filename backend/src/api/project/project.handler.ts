@@ -1,13 +1,18 @@
 import { Handler } from "express";
 import { z } from "zod";
 import statusRes from "../../lib/stautsRes.js";
-import { buildParameterValidators } from "../../lib/ci/pipelines/frameworks.js";
+import {
+  FrameworkTypes,
+  buildParameterValidators,
+  frameworks,
+} from "../../lib/ci/pipelines/frameworks.js";
 import { prisma } from "../../lib/db/prisma.js";
 import uniqueDomain from "../../lib/slug/generateUniqueDomain.js";
 import { createDeployment } from "../../lib/github/deployment.js";
 import { getInstallation } from "../../lib/github/index.js";
 import { getBranches } from "../../lib/github/getBranches.js";
 import createEnv from "../../lib/createEnv.js";
+import { deleteNamespace } from "../../lib/k8s/deleteNamespace.js";
 
 const schemaBase = z.object({
   repositoryName: z.string(),
@@ -114,4 +119,66 @@ const post: Handler = async (req, res) => {
   }
 };
 
-export { post };
+const idSchema = z.object({
+  id: z.string().cuid(),
+});
+
+const deleteHandler: Handler = async (req, res) => {
+  try {
+    const { id } = await idSchema.parseAsync(req.params);
+    const user = res.locals.user;
+
+    const project = await prisma.project.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!project) return res.status(404).send(statusRes("error", "Not found"));
+
+    if (project.userId !== user.id && user.role !== "admin")
+      return res.status(401).send(statusRes("error", "Unauthorized"));
+
+    await deleteNamespace(`${project.userId}-${project.id}`);
+
+    await prisma.project.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return res.send(statusRes("success", "Deleted"));
+  } catch (err: any) {
+    res.status(400).send(statusRes("error", err));
+  }
+};
+
+const getHandler: Handler = async (req, res) => {
+  const { id } = await idSchema.parseAsync(req.params);
+  const user = res.locals.user;
+
+  const project = await prisma.project.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!project) return res.status(404).send(statusRes("error", "Not found"));
+
+  if (project.userId !== user.id && user.role !== "admin")
+    return res.status(401).send(statusRes("error", "Unauthorized"));
+
+  const framework = frameworks[project.framework as FrameworkTypes];
+
+  return res.status(200).json({
+    ...project,
+    framework: {
+      id: project.framework,
+      displayName: framework.displayName,
+      icon: framework.icon,
+      buildOptions: framework.buildOptions,
+    },
+  });
+};
+
+export { post, deleteHandler, getHandler };

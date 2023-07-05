@@ -22,9 +22,11 @@ export const addDomainHandler: Handler = async (req, res) => {
   try {
     const { domain, envId } = await addSchema.parseAsync(req.body);
     const { id } = await paramsSchema.parseAsync(req.params);
+    const user = res.locals.user;
 
-    if (domain.endsWith(process.env.DOMAIN))
+    if (domain.endsWith(process.env.DOMAIN) && user.role !== "admin") {
       throw new Error("Official subdomain not allowed as custom domain");
+    }
 
     const project = await prisma.project.update({
       where: {
@@ -72,8 +74,7 @@ export const addDomainHandler: Handler = async (req, res) => {
 
     try {
       //delete old ingress for project domains
-      if (deployment.id)
-        await deleteIngress(deployment.id, ns, environment.id);
+      if (deployment.id) await deleteIngress(deployment.id, ns, environment.id);
 
       //Set project domains to current deployment
       await createIngress({
@@ -194,8 +195,7 @@ export const deleteDomainHandler: Handler = async (req, res) => {
 
     try {
       //delete old ingress for project domains
-      if (deployment.id)
-        await deleteIngress(deployment.id, ns, environment.id);
+      if (deployment.id) await deleteIngress(deployment.id, ns, environment.id);
 
       //Set project domains to current deployment
       await createIngress({
