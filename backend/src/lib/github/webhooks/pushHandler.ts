@@ -55,7 +55,8 @@ export default async function pushHandler(event: PushEvent) {
       installation.id,
       repository.name,
       repository.owner.name || "",
-      ref
+      ref,
+      env?.production
     );
     return true;
   } catch (err) {

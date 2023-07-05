@@ -29,7 +29,7 @@ export const createDeployment = async (
     ref: ref,
     repo: repo,
     auto_merge: false,
-    environment: production ? "Production" : "Preview",
+    environment: production ? "production" : "preview",
   });
 };
 
