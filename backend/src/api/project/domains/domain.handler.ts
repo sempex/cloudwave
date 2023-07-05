@@ -5,6 +5,7 @@ import { prisma } from "../../../lib/db/prisma.js";
 import deleteIngress from "../../../lib/k8s/deleteIngress.js";
 import createIngress from "../../../lib/k8s/createIngress.js";
 import { Prisma } from "@prisma/client";
+import hasProjectAccess from "../../../lib/access/hasProjectAccess.js";
 
 const DOMAIN =
   /^(?!:\/\/)(?=.{1,255}$)((.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+\.?)$/;
@@ -30,10 +31,7 @@ export const addDomainHandler: Handler = async (req, res) => {
 
     const project = await prisma.project.update({
       where: {
-        id_userId: {
-          id: id,
-          userId: res.locals.user.id,
-        },
+        id: id,
       },
       data: {
         environment: {
@@ -67,6 +65,14 @@ export const addDomainHandler: Handler = async (req, res) => {
         },
       },
     });
+
+    if (
+      !hasProjectAccess("write", {
+        projectId: project.id,
+        userId: project.userId,
+      })
+    )
+      return res.status(401).send(statusRes("error", "Unauthorized"));
 
     const environment = project.environment[0];
     const deployment = environment.deployment[0];
@@ -112,10 +118,7 @@ export const getDomainHandler: Handler = async (req, res) => {
 
     const project = await prisma.project.findUnique({
       where: {
-        id_userId: {
-          id: id,
-          userId: res.locals.user.id,
-        },
+        id: id,
       },
       include: {
         environment: {
@@ -125,6 +128,16 @@ export const getDomainHandler: Handler = async (req, res) => {
         },
       },
     });
+
+    if (!project) return res.status(404).send(statusRes("error", "Not found"));
+
+    if (
+      !hasProjectAccess("read", {
+        projectId: project.id,
+        userId: project.userId,
+      })
+    )
+      return res.status(401).send(statusRes("error", "Unauthorized"));
 
     res.send(
       project?.environment.reduce(
@@ -151,10 +164,7 @@ export const deleteDomainHandler: Handler = async (req, res) => {
 
     const project = await prisma.project.update({
       where: {
-        id_userId: {
-          id: id,
-          userId: res.locals.user.id,
-        },
+        id: id,
       },
       data: {
         environment: {
@@ -188,6 +198,14 @@ export const deleteDomainHandler: Handler = async (req, res) => {
         },
       },
     });
+
+    if (
+      !hasProjectAccess("write", {
+        projectId: project.id,
+        userId: project.userId,
+      })
+    )
+      return res.status(401).send(statusRes("error", "Unauthorized"));
 
     const environment = project.environment[0];
     const deployment = environment.deployment[0];

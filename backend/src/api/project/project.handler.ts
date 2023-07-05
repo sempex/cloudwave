@@ -13,6 +13,9 @@ import { getInstallation } from "../../lib/github/index.js";
 import { getBranches } from "../../lib/github/getBranches.js";
 import createEnv from "../../lib/createEnv.js";
 import { deleteNamespace } from "../../lib/k8s/deleteNamespace.js";
+import hasProjectAccess, {
+  getProjectAccess,
+} from "../../lib/access/hasProjectAccess.js";
 
 const schemaBase = z.object({
   repositoryName: z.string(),
@@ -136,7 +139,7 @@ const deleteHandler: Handler = async (req, res) => {
 
     if (!project) return res.status(404).send(statusRes("error", "Not found"));
 
-    if (project.userId !== user.id && user.role !== "admin")
+    if (!hasProjectAccess("admin", { projectId: project.id, userId: user.id }))
       return res.status(401).send(statusRes("error", "Unauthorized"));
 
     await deleteNamespace(`${project.userId}-${project.id}`);
@@ -165,7 +168,7 @@ const getHandler: Handler = async (req, res) => {
 
   if (!project) return res.status(404).send(statusRes("error", "Not found"));
 
-  if (project.userId !== user.id && user.role !== "admin")
+  if (!hasProjectAccess("read", { projectId: project.id, userId: user.id }))
     return res.status(401).send(statusRes("error", "Unauthorized"));
 
   const framework = frameworks[project.framework as FrameworkTypes];
@@ -178,6 +181,10 @@ const getHandler: Handler = async (req, res) => {
       icon: framework.icon,
       buildOptions: framework.buildOptions,
     },
+    accessLevel: await getProjectAccess({
+      projectId: project.id,
+      userId: user.id,
+    }),
   });
 };
 
