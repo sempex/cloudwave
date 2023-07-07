@@ -25,7 +25,7 @@ export default async function hasProjectAccess(
   const userAccess = project.acl.find((acl) => acl.userId === options.userId);
 
   if (project.userId === options.userId) return true;
-  
+
   if (await isSysAdmin(project.userId)) return true;
 
   if (!userAccess) return false;

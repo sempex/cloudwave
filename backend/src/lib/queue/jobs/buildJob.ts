@@ -118,6 +118,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     namespace: ns,
     appPort: project.port,
     image: image,
+    environmentId: dbDeployment.environment.id,
   });
 
   if (!project.keepDeployments && lastDeployment) {
@@ -136,12 +137,17 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   if (lastDeployment)
     await deleteIngress(lastDeployment.id, ns, dbDeployment.environment.id);
 
+  const customDomains = dbDeployment.environment.domain
+    .filter((d) => !d.default)
+    .map((d) => d.name);
+
   //Set project domains to current deployment
   await createIngress({
     domains: dbDeployment.environment.domain.map((d) => d.name),
     name: deploymentName,
     ns: ns,
     environment: dbDeployment.environment.id,
+    tlsDomains: customDomains,
   });
 
   //Create commit specific domain
@@ -149,6 +155,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     domains: [commitDomain],
     name: deploymentName,
     ns: ns,
+    tlsDomains: [],
   });
 
   await changeDeploymentState(installation?.id || 0, {

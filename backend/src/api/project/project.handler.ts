@@ -139,7 +139,12 @@ const deleteHandler: Handler = async (req, res) => {
 
     if (!project) return res.status(404).send(statusRes("error", "Not found"));
 
-    if (!hasProjectAccess("admin", { projectId: project.id, userId: user.id }))
+    if (
+      !(await hasProjectAccess("admin", {
+        projectId: project.id,
+        userId: user.id,
+      }))
+    )
       return res.status(401).send(statusRes("error", "Unauthorized"));
 
     await deleteNamespace(`${project.userId}-${project.id}`);
@@ -168,7 +173,12 @@ const getHandler: Handler = async (req, res) => {
 
   if (!project) return res.status(404).send(statusRes("error", "Not found"));
 
-  if (!hasProjectAccess("read", { projectId: project.id, userId: user.id }))
+  if (
+    !(await hasProjectAccess("read", {
+      projectId: project.id,
+      userId: user.id,
+    }))
+  )
     return res.status(401).send(statusRes("error", "Unauthorized"));
 
   const framework = frameworks[project.framework as FrameworkTypes];

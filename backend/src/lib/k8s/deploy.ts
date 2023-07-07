@@ -3,6 +3,8 @@ import { V1Deployment, V1Ingress } from "@kubernetes/client-node";
 import nsExists from "./nsExists.js";
 import createRegistrySecret from "./createRegistrySecret.js";
 import { globalConfig } from "../config.js";
+import { getEnvVars } from "./env/getEnvVars.js";
+import { prisma } from "../db/prisma.js";
 
 const DEFAULT_APP_PORT = 3000;
 
@@ -11,6 +13,7 @@ export default async function deploy(
   config: {
     image: string;
     namespace: string;
+    environmentId: string;
     appPort?: number;
   }
 ) {
@@ -27,6 +30,15 @@ export default async function deploy(
   }
 
   await createRegistrySecret(SECRET_NAME, namespaceSpec.metadata.name);
+
+  const envSecretName = `${config.environmentId}-${globalConfig.k8s.evnSecretSuffix}`;
+
+  const { env, variables } = await getEnvVars(
+    namespaceSpec.metadata.name,
+    envSecretName
+  );
+
+  console.log(variables);
 
   const deploymentSpec: V1Deployment = {
     spec: {
@@ -50,6 +62,13 @@ export default async function deploy(
               ports: [
                 {
                   containerPort: config.appPort || DEFAULT_APP_PORT,
+                },
+              ],
+              env: [
+                ...env,
+                {
+                  name: "SHIPER_ENVIRONMENT_ID",
+                  value: config.environmentId,
                 },
               ],
             },
@@ -96,8 +115,18 @@ export default async function deploy(
     serviceSpec
   );
 
+  await prisma.environment.update({
+    where: {
+      id: config.environmentId,
+    },
+    data: {
+      secretName: envSecretName,
+    },
+  });
+
   return {
     deployment,
     service,
+    envName: envSecretName,
   };
 }

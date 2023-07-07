@@ -15,9 +15,15 @@ export async function createCertificate(
   const existingCertificate = await getExistingCertificate(domains, ns);
 
   if (existingCertificate) {
-    console.log(`Certificate for domains "${domains.join(", ")}" already exists. Reusing "${existingCertificate}".`);
-    return existingCertificate;
+    console.log(
+      `Certificate for domains "${domains.join(
+        ", "
+      )}" already exists. Reusing "${existingCertificate}".`
+    );
+    return secretName;
   }
+
+  if (domains.length === 0) return null;
 
   await createClusterIssuerIfNotExists();
 
@@ -46,7 +52,11 @@ export async function createCertificate(
     certificateSpec
   );
 
-  console.log(`Certificate for domains "${domains.join(", ")}" created with name "${secretName}".`);
+  console.log(
+    `Certificate for domains "${domains.join(
+      ", "
+    )}" created with name "${secretName}".`
+  );
   return secretName;
 }
 
@@ -117,7 +127,7 @@ async function getClusterIssuer(issuerName: string) {
  * @param ns The namespace where the Certificate is located.
  * @returns The name of the existing Certificate if found, otherwise null.
  */
-async function getExistingCertificate(domains: string[], ns:string) {
+async function getExistingCertificate(domains: string[], ns: string) {
   const certificates = await custom.listNamespacedCustomObject(
     "cert-manager.io",
     "v1",
@@ -127,7 +137,10 @@ async function getExistingCertificate(domains: string[], ns:string) {
 
   for (const certificate of (certificates.body as any).items) {
     const certificateDomains = certificate.spec.dnsNames;
-    if (domains.length === certificateDomains.length && domains.every((domain) => certificateDomains.includes(domain))) {
+    if (
+      domains.length === certificateDomains.length &&
+      domains.every((domain) => certificateDomains.includes(domain))
+    ) {
       return certificate.metadata.name;
     }
   }

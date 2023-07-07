@@ -11,13 +11,24 @@ export default async function deleteIngress(
   const id = `${environment ? environment + "-" : ""}${name}`;
 
   const ingressName = id + "-" + globalConfig.k8s.ingressSuffix;
+  const tlsIngressName = id + "-" + globalConfig.k8s.tlsIngressSuffix;
   const secretName = id + "-tls-secret";
 
   try {
     await networking.deleteNamespacedIngress(ingressName, ns);
-    if (deleteCert) await deleteCertificate(secretName, ns);
-    return true;
-  } catch {
-    return false;
+    console.log(`Ingress "${ingressName}" deleted.`);
+  } catch (err) {
+    console.log(`Ingress "${ingressName}" not deleted.`);
   }
+
+  try {
+    await networking.deleteNamespacedIngress(tlsIngressName, ns);
+    console.log(`Ingress "${tlsIngressName}" deleted.`);
+  } catch (err) {
+    console.log(`Ingress "${tlsIngressName}" not deleted.`);
+  }
+
+  if (deleteCert) await deleteCertificate(secretName, ns);
+
+  return true;
 }

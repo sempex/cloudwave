@@ -16,19 +16,36 @@ export default async function createIngress({
   name,
   environment,
   ns,
+  tlsDomains,
 }: {
   name: string;
   domains: string[];
   environment?: string;
   ns: string;
+  tlsDomains: string[];
 }) {
   const id = `${environment ? environment + "-" : ""}${name}`;
 
   const ingressName = id + "-" + globalConfig.k8s.ingressSuffix;
+  const tlsIngressName = id + "-" + globalConfig.k8s.tlsIngressSuffix;
 
   // Create a single SSL certificate for all domains (or reuse existing)
   const secretName = nanoid(5) + "-" + id + "-tls-secret";
-  const certificateName = await createCertificate(domains, ns, secretName);
+
+  const certName = await createCertificate(tlsDomains, ns, secretName);
+
+  const PATH = {
+    backend: {
+      service: {
+        name: `${name}-${globalConfig.k8s.svcSuffix}`,
+        port: {
+          number: 80,
+        },
+      },
+    },
+    path: "/",
+    pathType: "Prefix",
+  };
 
   const ingressSpec: V1Ingress = {
     metadata: {
@@ -39,34 +56,40 @@ export default async function createIngress({
       rules: domains.map((domain) => ({
         host: domain,
         http: {
-          paths: [
-            {
-              backend: {
-                service: {
-                  name: `${name}-${globalConfig.k8s.svcSuffix}`,
-                  port: {
-                    number: 80,
-                  },
-                },
-              },
-              path: "/",
-              pathType: "Prefix",
-            },
-          ],
+          paths: [PATH],
+        },
+      })),
+    },
+  };
+
+  await networking.createNamespacedIngress(ns, ingressSpec);
+  
+  if (!certName) {
+    return {
+      domains: domains,
+    };
+  }
+
+  const tlsSpec: V1Ingress = {
+    metadata: {
+      name: tlsIngressName,
+    },
+    spec: {
+      ingressClassName: "nginx",
+      rules: tlsDomains.map((domain) => ({
+        host: domain,
+        http: {
+          paths: [PATH],
         },
       })),
       tls: [
         {
-          hosts: domains,
-          secretName: certificateName,
+          hosts: tlsDomains,
+          secretName: certName,
         },
       ],
     },
   };
 
-  const ingress = await networking.createNamespacedIngress(ns, ingressSpec);
-
-  return {
-    domains: domains,
-  };
+  await networking.createNamespacedIngress(ns, tlsSpec);
 }

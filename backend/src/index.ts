@@ -13,6 +13,7 @@ import domainRouter from "./api/project/domains/domain.route.js";
 import { queue } from "./lib/queue/index.js";
 import { initWorker } from "./lib/queue/worker.js";
 import frameworkRouter from "./api/frameworks/frameworks.router.js";
+import variablesRouter from "./api/project/variables/variables.router.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use(
 
 app.use("/project", deployRouter);
 app.use("/project/:id/domain", domainRouter);
+app.use("/project/:id/variables", variablesRouter);
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/github", githubRouter);

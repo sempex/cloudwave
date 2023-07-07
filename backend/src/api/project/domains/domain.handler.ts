@@ -67,10 +67,10 @@ export const addDomainHandler: Handler = async (req, res) => {
     });
 
     if (
-      !hasProjectAccess("write", {
+      !(await hasProjectAccess("write", {
         projectId: project.id,
         userId: project.userId,
-      })
+      }))
     )
       return res.status(401).send(statusRes("error", "Unauthorized"));
 
@@ -82,9 +82,18 @@ export const addDomainHandler: Handler = async (req, res) => {
       //delete old ingress for project domains
       if (deployment.id) await deleteIngress(deployment.id, ns, environment.id);
 
+      const domains = environment.domain
+        .filter((d) => d.default)
+        .map((d) => d.name);
+
+      const tlsDomains = environment.domain
+        .filter((d) => !d.default)
+        .map((d) => d.name);
+
       //Set project domains to current deployment
       await createIngress({
-        domains: environment.domain.map((d) => d.name),
+        domains: domains,
+        tlsDomains: tlsDomains,
         name: deployment.id,
         ns: ns,
         environment: environment.id,
@@ -132,10 +141,10 @@ export const getDomainHandler: Handler = async (req, res) => {
     if (!project) return res.status(404).send(statusRes("error", "Not found"));
 
     if (
-      !hasProjectAccess("read", {
+      !(await hasProjectAccess("read", {
         projectId: project.id,
         userId: project.userId,
-      })
+      }))
     )
       return res.status(401).send(statusRes("error", "Unauthorized"));
 
@@ -200,10 +209,10 @@ export const deleteDomainHandler: Handler = async (req, res) => {
     });
 
     if (
-      !hasProjectAccess("write", {
+      !(await hasProjectAccess("write", {
         projectId: project.id,
         userId: project.userId,
-      })
+      }))
     )
       return res.status(401).send(statusRes("error", "Unauthorized"));
 
@@ -215,9 +224,18 @@ export const deleteDomainHandler: Handler = async (req, res) => {
       //delete old ingress for project domains
       if (deployment.id) await deleteIngress(deployment.id, ns, environment.id);
 
+      const domains = environment.domain
+        .filter((d) => d.default)
+        .map((d) => d.name);
+
+      const tlsDomains = environment.domain
+        .filter((d) => !d.default)
+        .map((d) => d.name);
+
       //Set project domains to current deployment
       await createIngress({
-        domains: environment.domain.map((d) => d.name),
+        domains: domains,
+        tlsDomains: tlsDomains,
         name: deployment.id,
         ns: ns,
         environment: environment.id,

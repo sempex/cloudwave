@@ -46,21 +46,21 @@ model Project {
   port            Int              @default(3000)
   basePath        String?
   keepDeployments Boolean          @default(false)
-  acl      ProjectACL[]
+  acl             ProjectACL[]
 
   @@unique([repository, userId])
   @@unique([id, userId])
 }
 
 model ProjectACL {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   projectId String
   userId    String
   role      AccessLevel
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-  project   Project  @relation(fields: [projectId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id])
+  project   Project     @relation(fields: [projectId], references: [id])
 
   @@unique([projectId, userId])
 }
@@ -90,6 +90,7 @@ model Environment {
   projectId  String
   branch     String
   production Boolean
+  secretName String?
   deployment Deployment[]
   domain     Domain[]
 
