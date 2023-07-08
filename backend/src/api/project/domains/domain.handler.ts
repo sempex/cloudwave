@@ -11,18 +11,18 @@ const DOMAIN =
   /^(?!:\/\/)(?=.{1,255}$)((.{1,63}\.){1,127}(?![0-9]*$)[a-z0-9-]+\.?)$/;
 
 const addSchema = z.object({
-  envId: z.string(),
   domain: z.string().regex(DOMAIN, "Invalid FQDN"),
 });
 
 const paramsSchema = z.object({
   id: z.string().cuid(),
+  envId: z.string(),
 });
 
 export const addDomainHandler: Handler = async (req, res) => {
   try {
-    const { domain, envId } = await addSchema.parseAsync(req.body);
-    const { id } = await paramsSchema.parseAsync(req.params);
+    const { domain } = await addSchema.parseAsync(req.body);
+    const { id, envId } = await paramsSchema.parseAsync(req.params);
     const user = res.locals.user;
 
     if (domain.endsWith(process.env.DOMAIN) && user.role !== "admin") {
@@ -168,8 +168,8 @@ export const getDomainHandler: Handler = async (req, res) => {
 
 export const deleteDomainHandler: Handler = async (req, res) => {
   try {
-    const { domain, envId } = await addSchema.parseAsync(req.body);
-    const { id } = await paramsSchema.parseAsync(req.params);
+    const { domain } = await addSchema.parseAsync(req.body);
+    const { id, envId } = await paramsSchema.parseAsync(req.params);
 
     const project = await prisma.project.update({
       where: {

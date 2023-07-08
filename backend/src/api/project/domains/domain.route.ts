@@ -11,8 +11,8 @@ const domainRouter = Router({ mergeParams: true });
 
 domainRouter.use(deserializeUser, requireUser);
 
-domainRouter.post("/", addDomainHandler);
-domainRouter.get("/", getDomainHandler);
-domainRouter.delete("/", deleteDomainHandler);
+domainRouter.post("/:envId", addDomainHandler);
+domainRouter.get("/:envId", getDomainHandler);
+domainRouter.delete("/:envId", deleteDomainHandler);
 
 export default domainRouter;
