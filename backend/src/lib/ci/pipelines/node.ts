@@ -37,8 +37,11 @@ async function nodeBuilder({
   name,
   branch,
   buildParameters,
+  basePath,
 }: BuildProps<NodeBuildProps>): Promise<null | string> {
   let image = null;
+
+  const workDir = basePath ? "/app" + basePath : "/app";
 
   await connect(
     async (client) => {
@@ -49,7 +52,7 @@ async function nodeBuilder({
         .container()
         .from("node:16-slim")
         .withDirectory("/app", src)
-        .withWorkdir("/app")
+        .withWorkdir(workDir)
         .withExec(["npm", "i"])
         .withEntrypoint(["npm", "start"]);
 

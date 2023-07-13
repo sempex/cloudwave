@@ -14,6 +14,7 @@ export interface BuildProps<CustomBuildProps> {
   git: string;
   name: string;
   branch: string;
+  basePath?: string;
   buildParameters?: CustomBuildProps;
 }
 

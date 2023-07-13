@@ -17,12 +17,19 @@ import hasProjectAccess, {
   getProjectAccess,
 } from "../../lib/access/hasProjectAccess.js";
 
+const ONLY_FORWARD_PATH_REGEX = /^\/(?:[^\/.]+\/)*[^\/.]+$/;
+
 const schemaBase = z.object({
   repositoryName: z.string(),
   name: z.string().min(5).max(30),
   slug: z.string().max(30).optional(),
   appPort: z.number().max(65535).optional(),
   branch: z.string().optional().default("master"),
+  basePath: z
+    .string()
+    .regex(ONLY_FORWARD_PATH_REGEX, "Invalid path, path must be forward only")
+    .optional()
+    .default("/"),
 });
 
 const schema = buildParameterValidators.and(schemaBase);
@@ -35,6 +42,7 @@ const post: Handler = async (req, res) => {
       type,
       slug,
       appPort,
+      basePath,
       branch,
       buildParameters,
     } = await schema.parseAsync({
@@ -71,6 +79,7 @@ const post: Handler = async (req, res) => {
         slug: subDomain.slug,
         repository: repositoryName,
         port: appPort,
+        basePath: basePath,
         User: {
           connect: {
             id: res.locals.user.id,

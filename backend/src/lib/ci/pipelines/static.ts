@@ -18,8 +18,11 @@ async function staticBuilder({
   git,
   branch,
   name,
+  basePath,
 }: BuildProps<StaticBuildProps>): Promise<null | string> {
   let image = null;
+
+  const workDir = basePath ? "/app" + basePath : "/app";  
 
   await connect(
     async (client) => {
@@ -32,7 +35,7 @@ async function staticBuilder({
         .withExec(["adduser", "-D", "static"])
         .withExec(["su", "static"])
         .withDirectory("/app", src)
-        .withWorkdir("/app")
+        .withWorkdir(workDir)
         .withEntrypoint(["busybox", "httpd", "-f", "-v", "-p", "3000"]);
 
       // execute

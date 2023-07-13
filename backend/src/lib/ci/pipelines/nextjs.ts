@@ -44,6 +44,7 @@ async function nodeBuilder({
   git,
   name,
   branch,
+  basePath,
   buildParameters,
 }: BuildProps<NodeBuildProps>): Promise<null | string> {
   let image = null;
@@ -51,6 +52,8 @@ async function nodeBuilder({
 
   const ADD_GROUP = ["addgroup", "--system", "--gid", "1001", "nodejs"];
   const ADD_USER = ["adduser", "--system", "--uid", "1001", "nextjs"];
+
+  const workDir = basePath ? "/app" + basePath : "/app";
 
   console.log("Building Next.js app");
 
@@ -74,7 +77,7 @@ async function nodeBuilder({
         .from("node:18-alpine")
         .withExec(["apk", "add", "--no-cache", "libc6-compat"])
         .withDirectory("/app", src)
-        .withWorkdir("/app")
+        .withWorkdir(workDir)
         .withExec(packageManager.install);
 
       const builder = client

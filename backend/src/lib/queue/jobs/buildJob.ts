@@ -107,6 +107,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     git: globalConfig.git.githubBaseUrl + "/" + repository.full_name,
     name: subdomain,
     branch: branch.name,
+    basePath: project.basePath ?? "/",
   });
 
   if (!image) {
