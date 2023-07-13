@@ -20,7 +20,7 @@ export async function createCertificate(
         ", "
       )}" already exists. Reusing "${existingCertificate}".`
     );
-    return secretName;
+    return existingCertificate;
   }
 
   if (domains.length === 0) return null;

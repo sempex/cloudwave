@@ -30,7 +30,9 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   });
 
   if (typeof deployment.payload.projectId !== "string")
-    return console.error("project id not specified in deployment payload or is not a string");
+    return console.error(
+      "project id not specified in deployment payload or is not a string"
+    );
 
   const project = await prisma.project.findFirst({
     where: {
@@ -142,17 +144,21 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
   if (lastDeployment)
     await deleteIngress(lastDeployment.id, ns, dbDeployment.environment.id);
 
-  const customDomains = dbDeployment.environment.domain
+  const domains = dbDeployment.environment.domain
+    .filter((d) => d.default)
+    .map((d) => d.name);
+
+  const tlsDomains = dbDeployment.environment.domain
     .filter((d) => !d.default)
     .map((d) => d.name);
 
   //Set project domains to current deployment
   await createIngress({
-    domains: dbDeployment.environment.domain.map((d) => d.name),
+    domains: domains,
+    tlsDomains: tlsDomains,
     name: deploymentName,
     ns: ns,
     environment: dbDeployment.environment.id,
-    tlsDomains: customDomains,
   });
 
   //Create commit specific domain
