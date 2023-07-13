@@ -29,6 +29,9 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
     owner: repository.owner.login,
   });
 
+  if (typeof deployment.payload.projectId !== "string")
+    return console.error("project id not specified in deployment payload or is not a string");
+
   const project = await prisma.project.findFirst({
     where: {
       AND: [
@@ -37,6 +40,7 @@ export default async function buildJob(event: DeploymentCreatedEvent) {
           User: {
             installationId: String(installation?.id),
           },
+          id: deployment.payload.projectId,
         },
       ],
     },

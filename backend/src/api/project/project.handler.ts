@@ -26,10 +26,16 @@ const schemaBase = z.object({
   appPort: z.number().max(65535).optional(),
   branch: z.string().optional().default("master"),
   basePath: z
-    .string()
-    .regex(ONLY_FORWARD_PATH_REGEX, "Invalid path, path must be forward only")
-    .optional()
-    .default("/"),
+    .undefined()
+    .or(
+      z
+        .string()
+        .regex(
+          ONLY_FORWARD_PATH_REGEX,
+          "Invalid path, path must be forward only"
+        )
+        .default("/")
+    ),
 });
 
 const schema = buildParameterValidators.and(schemaBase);
@@ -119,6 +125,7 @@ const post: Handler = async (req, res) => {
         repo,
         installation.data.owner.login,
         branch.name,
+        project.id,
         env.production
       );
     }

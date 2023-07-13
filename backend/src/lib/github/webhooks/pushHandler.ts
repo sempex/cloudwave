@@ -18,7 +18,7 @@ export default async function pushHandler(event: PushEvent) {
     owner: repository.owner.login,
   });
 
-  const project = await prisma.project.findFirst({
+  const projects = await prisma.project.findMany({
     where: {
       AND: [
         {
@@ -38,29 +38,32 @@ export default async function pushHandler(event: PushEvent) {
     },
   });
 
-  if (!project || !installation) return;
+  if (!projects || !installation) return;
 
-  const env = project.environment.at(0);
+  for (const project of projects) {
+    const env = project.environment.at(0);
 
-  if (!env) {
-    await createEnv({
-      branch: { ...branch, main: false },
-      name: project.slug,
-      projectId: project.id,
-    });
+    if (!env) {
+      await createEnv({
+        branch: { ...branch, main: false },
+        name: project.slug,
+        projectId: project.id,
+      });
+    }
+
+    try {
+      await createDeployment(
+        installation.id,
+        repository.name,
+        repository.owner.name || "",
+        ref,
+        project.id,
+        env?.production
+      );
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  try {
-    await createDeployment(
-      installation.id,
-      repository.name,
-      repository.owner.name || "",
-      ref,
-      env?.production
-    );
-    return true;
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
+  return true;
 }

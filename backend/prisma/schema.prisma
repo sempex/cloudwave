@@ -44,11 +44,11 @@ model Project {
   BuildParameter  BuildParameter[]
   environment     Environment[]
   port            Int              @default(3000)
-  basePath        String?
+  basePath        String           @default("/")
   keepDeployments Boolean          @default(false)
   acl             ProjectACL[]
 
-  @@unique([repository, userId])
+  @@unique([repository, userId, basePath])
   @@unique([id, userId])
 }
 
