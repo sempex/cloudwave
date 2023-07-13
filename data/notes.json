@@ -1,0 +1,194 @@
+{
+  "notes": {
+    "403": {
+      "vault": {
+        "fsPath": ".",
+        "selfContained": true,
+        "name": "docs"
+      },
+      "fname": "403",
+      "id": "403",
+      "title": "This page has not yet sprouted",
+      "schemaStub": false,
+      "type": "note",
+      "updated": 1689249579900,
+      "created": 1689249579900,
+      "desc": "",
+      "links": [],
+      "anchors": {},
+      "children": [],
+      "parent": null,
+      "data": {}
+    },
+    "4mmrte35ar3p4u8s8iba1k3": {
+      "id": "4mmrte35ar3p4u8s8iba1k3",
+      "title": "Cloudwave",
+      "desc": "",
+      "updated": 1683722200036,
+      "created": 1683710328112,
+      "custom": {
+        "nav_order": 0,
+        "permalink": "/"
+      },
+      "fname": "root",
+      "type": "note",
+      "vault": {
+        "fsPath": ".",
+        "selfContained": true,
+        "name": "docs"
+      },
+      "contentHash": "fdc952c5cfe5dda00ebc18591251c761",
+      "links": [],
+      "anchors": {
+        "cloudwave-documentation": {
+          "type": "header",
+          "text": "Cloudwave Documentation",
+          "value": "cloudwave-documentation",
+          "line": 7,
+          "column": 0,
+          "depth": 1
+        }
+      },
+      "children": [
+        "sgxlnynp7wmo4nqyldvdjbm"
+      ],
+      "parent": null,
+      "data": {}
+    },
+    "sgxlnynp7wmo4nqyldvdjbm": {
+      "id": "sgxlnynp7wmo4nqyldvdjbm",
+      "title": "Cloudwave",
+      "desc": "",
+      "updated": 1683722216616,
+      "created": 1683722185654,
+      "custom": {},
+      "fname": "cloudwave",
+      "type": "note",
+      "vault": {
+        "fsPath": ".",
+        "selfContained": true,
+        "name": "docs"
+      },
+      "contentHash": "2f4bd41749fbd287c2b30d5d58ff6e01",
+      "links": [],
+      "anchors": {
+        "concept": {
+          "type": "header",
+          "text": "Concept",
+          "value": "concept",
+          "line": 8,
+          "column": 0,
+          "depth": 1
+        },
+        "components": {
+          "type": "header",
+          "text": "Components",
+          "value": "components",
+          "line": 15,
+          "column": 0,
+          "depth": 1
+        },
+        "build-images": {
+          "type": "header",
+          "text": "Build Images",
+          "value": "build-images",
+          "line": 16,
+          "column": 0,
+          "depth": 2
+        },
+        "store-and-cache-images": {
+          "type": "header",
+          "text": "Store and cache images",
+          "value": "store-and-cache-images",
+          "line": 20,
+          "column": 0,
+          "depth": 2
+        }
+      },
+      "children": [],
+      "parent": "4mmrte35ar3p4u8s8iba1k3",
+      "data": {}
+    }
+  },
+  "domains": [
+    {
+      "id": "4mmrte35ar3p4u8s8iba1k3",
+      "title": "Cloudwave",
+      "desc": "",
+      "updated": 1683722200036,
+      "created": 1683710328112,
+      "custom": {
+        "nav_order": 0,
+        "permalink": "/"
+      },
+      "fname": "root",
+      "type": "note",
+      "vault": {
+        "fsPath": ".",
+        "selfContained": true,
+        "name": "docs"
+      },
+      "contentHash": "fdc952c5cfe5dda00ebc18591251c761",
+      "links": [],
+      "anchors": {
+        "cloudwave-documentation": {
+          "type": "header",
+          "text": "Cloudwave Documentation",
+          "value": "cloudwave-documentation",
+          "line": 7,
+          "column": 0,
+          "depth": 1
+        }
+      },
+      "children": [
+        "sgxlnynp7wmo4nqyldvdjbm"
+      ],
+      "parent": null,
+      "data": {},
+      "body": "#  Cloudwave Documentation\n\nWe're thrilled that you've chosen our one-click deployment PaaS platform to deploy your applications and are excited to provide you with the resources you need to get started quickly and easily. 💻🚀\n\nOur documentation tools are designed to provide you with comprehensive guidance on how to use CloudWave, from setting up your account to deploying your first application. 📚🔍\n\nWhether you're new to cloud computing or an experienced developer, we're here to help you every step of the way. So dive in, explore our documentation, and get ready to ride the wave of cloud deployment! 🌊🏄‍♀️\n\n\n"
+    }
+  ],
+  "noteIndex": {
+    "id": "4mmrte35ar3p4u8s8iba1k3",
+    "title": "Cloudwave",
+    "desc": "",
+    "updated": 1683722200036,
+    "created": 1683710328112,
+    "custom": {
+      "nav_order": 0,
+      "permalink": "/"
+    },
+    "fname": "root",
+    "type": "note",
+    "vault": {
+      "fsPath": ".",
+      "selfContained": true,
+      "name": "docs"
+    },
+    "contentHash": "fdc952c5cfe5dda00ebc18591251c761",
+    "links": [],
+    "anchors": {
+      "cloudwave-documentation": {
+        "type": "header",
+        "text": "Cloudwave Documentation",
+        "value": "cloudwave-documentation",
+        "line": 7,
+        "column": 0,
+        "depth": 1
+      }
+    },
+    "children": [
+      "sgxlnynp7wmo4nqyldvdjbm"
+    ],
+    "parent": null,
+    "data": {},
+    "body": "#  Cloudwave Documentation\n\nWe're thrilled that you've chosen our one-click deployment PaaS platform to deploy your applications and are excited to provide you with the resources you need to get started quickly and easily. 💻🚀\n\nOur documentation tools are designed to provide you with comprehensive guidance on how to use CloudWave, from setting up your account to deploying your first application. 📚🔍\n\nWhether you're new to cloud computing or an experienced developer, we're here to help you every step of the way. So dive in, explore our documentation, and get ready to ride the wave of cloud deployment! 🌊🏄‍♀️\n\n\n"
+  },
+  "vaults": [
+    {
+      "fsPath": ".",
+      "selfContained": true,
+      "name": "docs"
+    }
+  ]
+}

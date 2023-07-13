@@ -1,0 +1,16 @@
+<h1 id="cloudwave">Cloudwave<a aria-hidden="true" class="anchor-heading icon-link" href="#cloudwave"></a></h1>
+<h1 id="concept">Concept<a aria-hidden="true" class="anchor-heading icon-link" href="#concept"></a></h1>
+<p>The center of our Infrastructure should be a Node JS API running some backend framework. When a specific route is called ("/deploy") the backend should check if a git URL was supplied and the framework type was also present in a separate field. </p>
+<p>It should then start a dagger pipeline for the framework given, that fetches the repo, builds a container for it and stores it in a local registry. If possible it could then also deploy the container to a k0s cluster. But this could also be handled separately with the k0s SDK. </p>
+<p>Later this could be expanted with seceret management and so on.</p>
+<h1 id="components">Components<a aria-hidden="true" class="anchor-heading icon-link" href="#components"></a></h1>
+<h2 id="build-images">Build Images<a aria-hidden="true" class="anchor-heading icon-link" href="#build-images"></a></h2>
+<p>It is important to safly build the images in an isolated env</p>
+<ul>
+<li><a href="https://github.com/genuinetools/img">https://github.com/genuinetools/img</a></li>
+</ul>
+<h2 id="store-and-cache-images">Store and cache images<a aria-hidden="true" class="anchor-heading icon-link" href="#store-and-cache-images"></a></h2>
+<p>Right now im unsure how this is going to work</p>
+<ul>
+<li><a href="https://docs.docker.com/registry/deploying/">https://docs.docker.com/registry/deploying/</a></li>
+</ul>

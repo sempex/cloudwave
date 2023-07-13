@@ -1,0 +1,18 @@
+{
+  "roots": [
+    {
+      "key": "sgxlnynp7wmo4nqyldvdjbm",
+      "title": "Cloudwave",
+      "icon": null,
+      "hasTitleNumberOutlined": false,
+      "vaultName": "docs",
+      "children": []
+    }
+  ],
+  "child2parent": {
+    "sgxlnynp7wmo4nqyldvdjbm": null
+  },
+  "notesLabelById": {
+    "sgxlnynp7wmo4nqyldvdjbm": "Cloudwave"
+  }
+}
